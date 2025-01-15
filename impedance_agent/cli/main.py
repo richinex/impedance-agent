@@ -1,23 +1,26 @@
 # impedance_agent/cli/main.py
-import typer
-import logging
 import asyncio
+import asyncio.exceptions
+import logging
 import os
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Optional
-from concurrent.futures import ThreadPoolExecutor
-from ..core.loaders import ImpedanceLoader
-from ..core.exporters import ResultExporter
-from ..core.config import Config
-from ..core.plotting import PlotManager
-from ..agent.analysis import ImpedanceAnalysisAgent
-from ..core.logging import setup_logging
-from ..core.env import env
-import matplotlib
 
+import matplotlib
 matplotlib.use("Agg")  # Use non-interactive backend
 import matplotlib.pyplot as plt
-import asyncio.exceptions
+import typer
+
+from ..agent.analysis import ImpedanceAnalysisAgent
+from ..core.config import Config
+from ..core.env import env
+from ..core.exceptions import ExportError
+from ..core.exporters import ResultExporter
+from ..core.loaders import ImpedanceLoader
+from ..core.logging import setup_logging
+from ..core.plotting import PlotManager
+
 
 app = typer.Typer()
 
@@ -26,24 +29,20 @@ async def run_async_tasks(
     result, output_path, output_format, plot, plot_dir, plot_format, show_plots
 ):
     """Run export and plotting tasks concurrently"""
-    export_task = None
-    plot_task = None
-
     try:
-        # Set up tasks
+        # Set up and execute tasks
         if output_path:
-            export_task = asyncio.create_task(
-                ResultExporter.export_async(result, output_path, output_format)
-            )
-            markdown_task = asyncio.create_task(
+            # Execute both export tasks concurrently
+            await asyncio.gather(
+                ResultExporter.export_async(result, output_path, output_format),
                 ResultExporter.export_async(
                     result, Path(output_path).parent / "analysis_summary.md", "md"
                 )
             )
 
         if plot and plot_dir:
-            plot_task = asyncio.create_task(
-                asyncio.to_thread(
+            try:
+                await asyncio.to_thread(
                     PlotManager.create_plots,
                     result=result,
                     output_dir=plot_dir,
@@ -51,25 +50,13 @@ async def run_async_tasks(
                     show=show_plots,
                     dpi=300,
                 )
-            )
-
-        # Wait for tasks and handle errors individually
-        if export_task:
-            try:
-                await export_task
-            except ExportError as e:
-                logging.error(f"Export failed: {e}")
-            except Exception as e:
-                logging.error(f"Unexpected error during export: {e}")
-
-        if plot_task:
-            try:
-                await plot_task
             except ExportError as e:
                 logging.error(f"Plot export failed: {e}")
             except Exception as e:
                 logging.error(f"Unexpected error during plotting: {e}")
 
+    except ExportError as e:
+        logging.error(f"Export failed: {e}")
     except Exception as e:
         logging.error(f"Error in async tasks: {str(e)}")
 
@@ -108,7 +95,7 @@ def analyze(
 
         if provider not in available_providers:
             logger.error(
-                f"Provider '{provider}' is not available. Available providers: {', '.join(available_providers)}"
+                f"Provider '{provider}' not available. Available: {', '.join(available_providers)}"
             )
             raise typer.Exit(1)
 
@@ -133,8 +120,8 @@ def analyze(
         if debug:
             logger.debug(f"Loading file: {data_path}")
             logger.debug(f"Using provider: {provider}")
-        if ecm:
-            logger.debug(f"Using equivalent circuit model config: {ecm}")
+            if ecm:
+                logger.debug(f"Using equivalent circuit model config: {ecm}")
 
         # Determine optimal number of workers if not specified
         if workers is None:
@@ -144,9 +131,7 @@ def analyze(
         async def load_data_and_config():
             with ThreadPoolExecutor(max_workers=2) as pool:
                 loop = asyncio.get_running_loop()
-                data_future = loop.run_in_executor(
-                    pool, ImpedanceLoader.load, data_path
-                )
+                data_future = loop.run_in_executor(pool, ImpedanceLoader.load, data_path)
 
                 if ecm:
                     config_future = loop.run_in_executor(pool, Config.load_model, ecm)
@@ -209,17 +194,12 @@ def analyze(
                 pending = asyncio.all_tasks(loop)
                 for task in pending:
                     task.cancel()
-
-                loop.run_until_complete(
-                    asyncio.gather(*pending, return_exceptions=True)
-                )
+                loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
             except Exception as e:
                 logger.error(f"Error during task cleanup: {str(e)}")
 
-        # Close plots
-        plt.close("all")
-
-        # Close loop
+        # Close plots and loop
+        plt.close('all')
         if loop and not loop.is_closed():
             loop.close()
 
@@ -237,7 +217,6 @@ def list_providers():
         typer.echo("No LLM providers are configured. Please check your .env file.")
 
 
-# Add version command
 @app.command()
 def version():
     """Show the version of the impedance agent"""

@@ -1,15 +1,16 @@
-# src/fitters/drt.py
+# impedance_agent/fitters/drt.py
 import logging
+from typing import Optional, Dict, Tuple
+
 import jax
 import jax.numpy as jnp
 import numpy as np
 from jaxopt import ProjectedGradient
 from jaxopt.projection import projection_non_negative
-from scipy.signal import find_peaks, peak_widths
 from scipy.optimize import least_squares
-from typing import Optional, Dict, Tuple
-from ..core.models import ImpedanceData, DRTResult
+from scipy.signal import find_peaks, peak_widths
 
+from ..core.models import DRTResult, ImpedanceData
 
 class DRTFitter:
     def __init__(
@@ -442,132 +443,6 @@ class DRTFitter:
 
         return jnp.flip(self.rpol * z_mod)
 
-    def tikh_residual_norm(self, g_vector, lam_t, a_mat_t_a, b_rhs, id_matrix):
-        """Compute norm of Tikhonov residual and LHS norm."""
-        lhs_matrix = a_mat_t_a + lam_t * id_matrix
-        lhs_prod = jnp.matmul(lhs_matrix, g_vector)
-        sum_res = jnp.sqrt(jnp.sum((lhs_prod - b_rhs) ** 2))
-        sum_lhs = jnp.sqrt(jnp.sum(lhs_prod**2))
-        return sum_res, sum_lhs
-
-    def fit(self) -> Optional[DRTResult]:
-        """Perform the complete DRT fitting process."""
-        try:
-            self.logger.info("Starting DRT analysis")
-
-            # Find optimal lambda parameters
-            resid, solnorm, arr_lam_t, arr_lam_pg = self.find_lambda()
-            self.logger.debug("Completed lambda parameter search")
-
-            # Prepare for least squares
-            lamvec_init = jnp.array([self.lam_t0, self.lam_pg0], dtype=jnp.float64)
-            lamvec_init_log = self.encode(
-                lamvec_init, self.lower_bounds, self.upper_bounds
-            )
-
-            # Perform optimization
-            res_parm = least_squares(
-                jax.jit(self.tikh_residual),
-                lamvec_init_log,
-                method="lm",
-                jac=self.jacobian_lsq,
-                args=(
-                    self.a_tikh,
-                    self.a_mat_t_a,
-                    self.b_rhs,
-                    self.d_ln_tau,
-                    self.id_matrix,
-                    self.lower_bounds,
-                    self.upper_bounds,
-                ),
-            )
-
-            final_lamvec = self.decode(res_parm.x, self.lower_bounds, self.upper_bounds)
-            self.logger.info(
-                f"Final parameters: λT={final_lamvec[0]:.2e}, λPG={final_lamvec[1]:.2e}"
-            )
-
-            # Get final DRT distribution
-            gfun_final, rpoly, n_iters = self.pg_solver(
-                final_lamvec,
-                self.a_tikh,
-                self.a_mat_t_a,
-                self.b_rhs,
-                self.d_ln_tau,
-                self.id_matrix,
-            )
-
-            self.logger.info(f"Completed projected gradient in {n_iters} iterations")
-            self.logger.info(f"Rpol = {self.rpol:.6g}, Final rpoly = {rpoly:.6g}")
-
-            # Calculate residuals
-            res_init, lhs_init = self.tikh_residual_norm(
-                self.gfun_init, self.lam_t0, self.a_mat_t_a, self.b_rhs, self.id_matrix
-            )
-            res_fin, lhs_fin = self.tikh_residual_norm(
-                gfun_final, final_lamvec[0], self.a_mat_t_a, self.b_rhs, self.id_matrix
-            )
-
-            self.logger.info(
-                f"Residuals: initial = {res_init:.6e}, final = {res_fin:.6e}"
-            )
-
-            if res_parm.status > 0:
-                self.logger.info(
-                    f"Optimization successful: {res_parm.njev} Jacobian evaluations"
-                )
-
-            if self.flagiter == 1:
-                self.logger.warning(
-                    "Maximum iteration limit reached in projected gradient"
-                )
-
-            # Find peaks
-            peak_params = self.rpol_peaks(gfun_final)
-            if peak_params.size > 0:
-                peak_freqs = [float(f) for f in peak_params[0]]
-                peak_pols = [float(p) for p in peak_params[1]]
-                self.logger.info("Identified DRT peaks:")
-                for f, p in zip(peak_freqs, peak_pols):
-                    self.logger.info(f"  f = {f:.2f} Hz, polarization = {p:.5f}")
-            else:
-                self.logger.warning("No peaks detected in DRT spectrum")
-                peak_freqs, peak_pols = [], []
-
-            # Convert JAX arrays to numpy arrays
-            tau = np.array(self.tau)
-            gamma = np.array(gfun_final)
-
-            # Calculate model impedance
-            Z_fit = self.z_model_imre(gfun_final)
-            Z_fit = np.array(Z_fit)  # Convert to numpy array
-
-            # Calculate normalized residuals
-            residuals_real, residuals_imag = self.compute_normalized_residuals(Z_fit)
-
-            # Validate results
-            if np.any(np.isnan(gamma)) or np.any(np.isinf(gamma)):
-                raise ValueError("Invalid values detected in final DRT solution")
-
-            # Create result object with fitted impedance and residuals
-            result = DRTResult(
-                tau=tau,
-                gamma=gamma,
-                peak_frequencies=peak_freqs,
-                peak_polarizations=peak_pols,
-                regularization_param=float(final_lamvec[0]),
-                residual=float(rpoly),
-                Z_fit=Z_fit,
-                residuals_real=residuals_real,
-                residuals_imag=residuals_imag,
-            )
-
-            self.logger.debug(f"Created DRTResult object with {len(peak_freqs)} peaks")
-            return result
-
-        except Exception as e:
-            self.logger.error("DRT fitting failed", exc_info=True)
-            return None
 
     def tikh_residual_norm(self, g_vector, lam_t, a_mat_t_a, b_rhs, id_matrix):
         """Compute norm of Tikhonov residual and LHS norm."""
