@@ -36,10 +36,10 @@ cp impedance_agent/.env.example .env
 impedance-agent data/impedance.txt
 ```
 
-### With Model Fitting
+### With ECM Fitting
 
 ```bash
-impedance-agent data/impedance.txt --model-config configs/models/randles.yaml
+impedance-agent data/impedance.txt --ecm configs/models/randles.yaml
 ```
 
 ### Full Options
@@ -47,9 +47,11 @@ impedance-agent data/impedance.txt --model-config configs/models/randles.yaml
 ```bash
 python -m src.cli.main \
   data/impedance.txt \
-  --model-config configs/models/randles.yaml \
+  --ecm configs/models/randles.yaml \
   --output-path results/analysis.json \
   --output-format json \
+  --plot-format png \
+  --plot \
   --log-level DEBUG \
   --debug
 ```
@@ -57,19 +59,28 @@ python -m src.cli.main \
 ### Command Line Options
 
 - `data_path`: Path to impedance data file (required)
-- `--model-config`: Path to model configuration file
+- `--ecm`: Path to the equivalent circuit model (ECM) configuration file
 - `--output-path`: Path for saving results
 - `--output-format`: Output format (json/csv/excel)
+- `--plot-format`: Plot format (png/pdf/svg)
+- `--plot`: Generate plots (default: True)
+- `--show-plots`: Display plots in window (default: False)
 - `--log-level`: Logging level (DEBUG/INFO/WARNING/ERROR)
-- `--debug`: Enable debug mode
+- `--debug`: Enable debug mode (default: False)
+- `--workers`: Number of worker processes (default: auto-detected)
+
+### Additional Commands
+
+- `list_providers`: List available LLM providers.
+- `version`: Show the version of the impedance agent.
 
 ## Input Data Format
 
 Supports CSV/TXT files with the following columns:
 
-- `frequency (Hz)`
-- `Z_real (Ω)`
-- `Z_imag (Ω)`
+- `frequency` (Hz)
+- `Z_real` (Ω)
+- `Z_imag` (Ω)
 
 ## Model Configuration
 
@@ -103,7 +114,7 @@ variables:
 The tool provides:
 
 - DRT Analysis Results
-- ECM Fitting Parameters (if model provided)
+- ECM Fitting Parameters (if ECM provided)
 - Lin-KK Validation Metrics
 - AI-Generated Interpretation
 - Detailed Recommendations
@@ -114,8 +125,8 @@ The tool provides:
 - JAX/JAXopt
 - NumPy/SciPy
 - Pydantic
-- OpenAI / Deepseek API Access
-- impedance.py
+- OpenAI API Access
+- `impedance.py`
 
 ## Contributing
 
@@ -137,7 +148,8 @@ If you use this tool in your research, please cite:
 ## Support the Project
 
 If you find this tool useful, consider buying me a coffee:
-<a href="https://www.buymeacoffee.com/richinex" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/YOUR_USERNAME)
 
 ## Documentation
 
@@ -148,7 +160,7 @@ For detailed documentation, visit: [Documentation Link]
 This project uses several open-source packages including:
 
 - JAX/JAXopt for optimization
-- impedance.py for impedance analysis
+- `impedance.py` for impedance analysis
 - OpenAI's API for AI-assisted interpretation
 
 ## License
