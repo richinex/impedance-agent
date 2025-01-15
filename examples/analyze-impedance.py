@@ -1,7 +1,7 @@
 # examples/analyze_impedance.py
 import numpy as np
-from src.core.models import ImpedanceData
-from src.agent.analysis import ImpedanceAnalysisAgent
+from impedance_agent.core.models import ImpedanceData
+from impedance_agent.agent.analysis import ImpedanceAnalysisAgent
 
 
 def main():
@@ -29,8 +29,8 @@ def main():
         ],
     }
 
-    # Run analysis
-    agent = ImpedanceAnalysisAgent()
+    # Run analysis with specified provider
+    agent = ImpedanceAnalysisAgent(provider="deepseek")  # or "openai"
     result = agent.analyze(data, model_config)
 
     # Print results
