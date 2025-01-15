@@ -171,7 +171,10 @@ class DeepSeekAgent(BaseAgent):
             prompt += "\n1. fit_linkk - for data validation"
             prompt += "\n2. fit_drt - for time constant distribution"
 
-        prompt += "\n\nEnsure that residuals (both real and imaginary) are included in the analysis and evaluation of the fits."
+        prompt += (
+            "\n\nEnsure that residuals (both real and imaginary) are included in "
+            "the analysis and evaluation of the fits."
+        )
 
         return prompt
 

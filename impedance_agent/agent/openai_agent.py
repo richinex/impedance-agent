@@ -182,7 +182,8 @@ class OpenAIAgent(BaseAgent):
             prompt += "- Analyze residuals (real and imaginary) to assess fit quality\n"
             prompt += "- Provide overall assessment of data quality and reliability\n"
 
-        prompt += "\n\nEnsure that residuals (both real and imaginary) are included in the analysis and evaluation of the fits."
+        prompt += "\n\nEnsure that residuals (both real and imaginary) are included in "
+            "the analysis and evaluation of the fits."
 
         return prompt
 
