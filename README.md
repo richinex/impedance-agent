@@ -1,15 +1,33 @@
 
-# Impedance Analysis Tool
+# Impedance Agent
 
-A Python package for automated impedance spectroscopy analysis.
+The analysis of electrochemical impedance spectroscopy (EIS) data involves basically three stages/steps
 
-The package leverages advanced numerical optimization techniques through JAX/JAXopt for robust fitting procedures, while incorporating AI-powered interpretation to provide insights about the underlying physical and electrochemical processes. Whether you're analyzing fuel cells, batteries, corrosion systems, or any other electrochemical interface, this tool offers a powerful and user-friendly approach to impedance analysis.
+- Check for data quality or KK using tools such as Boukamp's linKK
+- Fit of an equivalent circuit model (ECM) model to the data by means of complex non-linear least squares (CNLS)
+- Analysis of the distribution of relaxation times (DRT)
+
+We know that there are existing tools and algorithms for these analyses.
+
+EIS is already notoriously difficult to interpret. What if we gave an LLM access to these tools and have it orchestrate the analyses and intepret the results? Can it offer further insights?
+
+Enter Impedance Agent - A Python package for automated impedance spectroscopy analysis.
+
+This package uses an LLM workflow to automate the analysis of electrochemical impedance spectroscopy(EIS) data.
+
+Impedance agent has access to three tools - A fit-linkk, fit-drt and fit-ecm tool. The agent runs these tools concurrently or sequentially
+
+and uses the results from the analysis to provide insights about the quality of the data, the quality of the fit, and the likely underlying physical and electrochemical processes.
+
+Whether you're analyzing fuel cells, batteries, corrosion systems, or any other electrochemical interface, this library offers a powerful and user-friendly approach to impedance analysis.
+
+Should you choose to ignore the summary of the LLM, you still have the guarantee of a one-shot analysis.
 
 ## Key Benefits
 
 - Automated workflows that reduce analysis time from hours to minutes
 - Robust numerical methods for reliable parameter extraction
-- AI-assisted interpretation for deeper insights into your systems
+- LLM-assisted interpretation for deeper insights into your systems
 - Comprehensive validation through Lin-KK testing
 - Flexible output formats for easy integration with other tools
 - Publication-ready visualizations
@@ -19,7 +37,7 @@ The package leverages advanced numerical optimization techniques through JAX/JAX
 - **Distribution of Relaxation Times (DRT) Analysis**
 - **Equivalent Circuit Model (ECM) Fitting**
 - **Lin-KK Data Validation**
-- **AI-Assisted Interpretation of Results**
+- **LLM-Assisted Interpretation of Results**
 - **Multiple Output Formats**: JSON, CSV, Excel
 - **Configurable Logging and Debug Modes**
 
@@ -33,9 +51,11 @@ source venv/bin/activate  # Linux/Mac
 .env\Scripts\activate  # Windows
 
 # Install package
+git clone https://github.com/richinex/impedance-agent.git
+cd impedance-agent
 pip install -e .
 
-# Setup environment variables
+# Setup environment variables using env.example in the root folder
 cp impedance_agent/.env.example .env
 # Edit .env with your API keys
 ```
@@ -230,11 +250,16 @@ If you use this tool in your research, please cite:
 ```bibtex
 @software{impedance_agent,
   author = {Chukwu, Richard},
-  title = {Impedance-Agent: AI-powered EIS Analysis Tool},
+  title = {Impedance-Agent: LLM-powered EIS Analysis Tool},
   year = {2024},
   url = {https://github.com/richinex/impedance-agent}
 }
 ```
+## Caveat
+
+We know that LLMs are not perfect. They hallucinate. The summary provided by the LLM does not eliminate the need for a domain knowledge expert review.
+
+The idea of this library is to provide insights meant to guide an expert analysis
 
 ## Support the Project
 
@@ -251,9 +276,9 @@ For detailed documentation, see the [docs](https://richinex.github.io/impedance-
 This project uses several open-source packages including:
 
 - JAX/JAXopt for optimization
-- `impedance.py` for impedance analysis
-- OpenAI / DeepSeek API for AI-assisted interpretation
-
+- DRT package by Andrei Kulikovsky (rewritten in JAX)
+- `impedance.py` for linKK analysis
+- OpenAI / DeepSeek API for AI-assisted interpretation and summary generation
 ## License
 
 This project is licensed under the MIT License.
