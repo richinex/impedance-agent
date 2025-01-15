@@ -16,9 +16,10 @@ Features
 ========
 
 * Automated EIS data analysis
+* Check for Kramers-Kronig compliance with LinKK (Impedancepy)
 * Support for multiple equivalent circuit models
 * Distribution of relaxation times (DRT) analysis
-* Integration with AI-powered analysis tools
+* Integration with an LLM workflow to provide analysis summary
 
 Indices and tables
 ==================
