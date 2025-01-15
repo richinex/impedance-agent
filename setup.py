@@ -1,8 +1,11 @@
 from setuptools import setup, find_packages
+import os
 
-# Read version from __version__.py
-with open("impedance_agent/__version__.py", "r") as f:
-    exec(f.read())
+# Read version info
+about = {}
+here = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(here, "impedance_agent", "__version__.py"), "r") as f:
+    exec(f.read(), about)
 
 # Read README for long description
 with open("README.md", "r", encoding="utf-8") as fh:
@@ -10,8 +13,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="impedance-agent",
-    version=__version__,
-    author=__author__,
+    version=about["__version__"],
+    author=about["__author__"],
     author_email="",
     description="AI-powered CLI tool for electrochemical impedance spectroscopy analysis",
     long_description=long_description,
@@ -47,7 +50,7 @@ setup(
             "sphinx>=7.0.0",
             "sphinx-rtd-theme>=1.3.0",
             "sphinx-autoapi>=3.0.0",  # Added for better API documentation
-            "myst-parser>=2.0.0",     # Added for Markdown support in docs
+            "myst-parser>=2.0.0",  # Added for Markdown support in docs
             "tox>=4.11.0",
             "openpyxl>=3.1.0",
             "pytest-asyncio>=0.23.0",  # Added for async test support
@@ -95,5 +98,5 @@ setup(
         "Documentation": "https://richinex.github.io/impedance-agent/",
         "Release Notes": "https://github.com/richinex/impedance-agent/releases",
     },
-    license=__license__,
+    license=about["__license__"],
 )
