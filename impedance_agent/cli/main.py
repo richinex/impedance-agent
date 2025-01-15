@@ -1,4 +1,5 @@
 # impedance_agent/cli/main.py
+# Standard library imports
 import asyncio
 import asyncio.exceptions
 import logging
@@ -7,11 +8,15 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Optional
 
+# Third-party imports
+import typer
+
+# Matplotlib imports (with config)
 import matplotlib
 matplotlib.use("Agg")  # Use non-interactive backend
 import matplotlib.pyplot as plt
-import typer
 
+# Local imports
 from ..agent.analysis import ImpedanceAnalysisAgent
 from ..core.config import Config
 from ..core.env import env
