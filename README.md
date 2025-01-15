@@ -1,4 +1,3 @@
-
 # Impedance Analysis Tool
 
 An AI-powered tool for analyzing electrochemical impedance spectroscopy (EIS) data using Distribution of Relaxation Times (DRT), Equivalent Circuit Modeling (ECM), and Lin-KK validation.
@@ -55,13 +54,13 @@ python -m src.cli.main \
   --debug
 ```
 
-## Command Line Options
+### Command Line Options
 
 - `data_path`: Path to impedance data file (required)
 - `--model-config`: Path to model configuration file
 - `--output-path`: Path for saving results
-- `--output-format`: Output format (`json`/`csv`/`excel`)
-- `--log-level`: Logging level (`DEBUG`/`INFO`/`WARNING`/`ERROR`)
+- `--output-format`: Output format (json/csv/excel)
+- `--log-level`: Logging level (DEBUG/INFO/WARNING/ERROR)
 - `--debug`: Enable debug mode
 
 ## Input Data Format
@@ -103,11 +102,11 @@ variables:
 
 The tool provides:
 
-- **DRT Analysis Results**
-- **ECM Fitting Parameters** (if model provided)
-- **Lin-KK Validation Metrics**
-- **AI-Generated Interpretation**
-- **Detailed Recommendations**
+- DRT Analysis Results
+- ECM Fitting Parameters (if model provided)
+- Lin-KK Validation Metrics
+- AI-Generated Interpretation
+- Detailed Recommendations
 
 ## Requirements
 
@@ -115,9 +114,45 @@ The tool provides:
 - JAX/JAXopt
 - NumPy/SciPy
 - Pydantic
-- OpenAI API Access
-- `impedance.py`
+- OpenAI / Deepseek API Access
+- impedance.py
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+## Citation
+
+If you use this tool in your research, please cite:
+
+```bibtex
+@software{impedance_agent,
+  author = {Chukwu, Richard},
+  title = {Impedance-Agent: AI-powered EIS Analysis Tool},
+  year = {2024},
+  url = {https://github.com/richinex/impedance-agent}
+}
+```
+
+## Support the Project
+
+If you find this tool useful, consider buying me a coffee:
+<a href="https://www.buymeacoffee.com/richinex" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
+## Documentation
+
+For detailed documentation, visit: [Documentation Link]
+
+## Acknowledgments
+
+This project uses several open-source packages including:
+
+- JAX/JAXopt for optimization
+- impedance.py for impedance analysis
+- OpenAI's API for AI-assisted interpretation
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the MIT License.
+
+Made with ❤️ by Richard Chukwu
