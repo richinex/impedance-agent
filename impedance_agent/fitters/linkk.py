@@ -1,7 +1,7 @@
 # src/fitters/linkk.py
 import numpy as np
 import logging
-from typing import Optional, Tuple
+from typing import Optional
 from impedance.validation import linKK
 from ..core.models import ImpedanceData, LinKKResult
 

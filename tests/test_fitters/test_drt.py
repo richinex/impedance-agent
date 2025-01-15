@@ -1,7 +1,6 @@
 # tests/test_fitters/test_drt.py
 import pytest
 import numpy as np
-import jax.numpy as jnp
 from impedance_agent.core.models import ImpedanceData, DRTResult
 from impedance_agent.fitters.drt import DRTFitter
 

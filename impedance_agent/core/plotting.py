@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 import logging
-from typing import Optional, Union
+from typing import Union
 from .models import AnalysisResult
 
 # Constants for figure sizing

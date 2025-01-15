@@ -2,7 +2,6 @@
 import pytest
 import numpy as np
 import pandas as pd
-from pathlib import Path
 from impedance_agent.core.loaders import ImpedanceLoader
 from impedance_agent.core.exceptions import DataLoadError
 from impedance_agent.core.models import ImpedanceData

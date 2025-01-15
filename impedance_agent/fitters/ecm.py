@@ -4,7 +4,7 @@ import jaxopt
 import jax.numpy as jnp
 import numpy as np
 import logging
-from typing import Optional, Tuple, Dict, Any, List
+from typing import Optional, Tuple Any
 from ..core.models import ImpedanceData, FitResult, FitQualityMetrics
 
 
@@ -163,74 +163,6 @@ class ECMFitter:
         Q1, R1 = jnp.linalg.qr(jnp.concatenate([vre, vim], axis=0))
         invR1 = jnp.linalg.inv(R1)
         return jnp.linalg.norm(invR1, axis=1) * jnp.sqrt(wrms)
-
-    # def _calculate_correlation_matrix(self, popt: jnp.ndarray) -> jnp.ndarray:
-    #     """Calculate parameter correlation matrix using covariance matrix"""
-    #     # Get Jacobian matrix
-    #     grads = jax.jacfwd(self.model)(popt, self.freq)
-    #     grads_re = grads[:self.num_freq]
-    #     grads_im = grads[self.num_freq:]
-
-    #     # Weight the Jacobian
-    #     rtwre = jnp.diag(1/self.zerr_Re)
-    #     rtwim = jnp.diag(1/self.zerr_Im)
-    #     vre = rtwre @ grads_re
-    #     vim = rtwim @ grads_im
-
-    #     # Calculate covariance matrix
-    #     J = jnp.concatenate([vre, vim], axis=0)
-    #     JTJ = J.T @ J
-    #     cov = jnp.linalg.inv(JTJ)
-
-    #     # More stable correlation calculation
-    #     std = jnp.sqrt(jnp.diag(cov))
-    #     corr = jnp.zeros_like(cov)
-    #     n = len(std)
-    #     for i in range(n):
-    #         for j in range(n):
-    #             corr = corr.at[i,j].set(cov[i,j] / (std[i] * std[j]))
-
-    #     return corr
-
-    # def _calculate_correlation_matrix(self, popt: jnp.ndarray) -> jnp.ndarray:
-    #     """Calculate parameter correlation matrix using covariance matrix"""
-    #     # Get Jacobian matrix
-    #     grads = jax.jacfwd(self.model)(popt, self.freq)
-    #     grads_re = grads[:self.num_freq]
-    #     grads_im = grads[self.num_freq:]
-
-    #     # Weight the Jacobian
-    #     rtwre = jnp.diag(1/self.zerr_Re)
-    #     rtwim = jnp.diag(1/self.zerr_Im)
-    #     vre = rtwre @ grads_re
-    #     vim = rtwim @ grads_im
-
-    #     # Calculate covariance matrix more stably
-    #     J = jnp.concatenate([vre, vim], axis=0)
-
-    #     # Use SVD for better numerical stability
-    #     U, s, Vt = jnp.linalg.svd(J, full_matrices=False)
-
-    #     # Filter small singular values
-    #     rcond = jnp.finfo(s.dtype).eps * max(J.shape)
-    #     cutoff = rcond * s[0]
-    #     s_inv = jnp.where(s > cutoff, 1/s, 0)
-
-    #     # Compute covariance matrix
-    #     cov = (Vt.T * s_inv**2) @ Vt
-
-    #     # Calculate correlation matrix with bounds checking
-    #     std = jnp.sqrt(jnp.abs(jnp.diag(cov)))  # abs for numerical stability
-    #     corr = jnp.zeros_like(cov)
-    #     n = len(std)
-    #     for i in range(n):
-    #         for j in range(n):
-    #             # Ensure correlation is bounded [-1,1]
-    #             correlation = cov[i,j] / (std[i] * std[j])
-    #             correlation = jnp.clip(correlation, -1.0, 1.0)
-    #             corr = corr.at[i,j].set(correlation)
-
-    #     return corr
 
     def _calculate_correlation_matrix(self, popt: jnp.ndarray) -> jnp.ndarray:
         """Calculate correlation matrix using Hessian of objective function"""

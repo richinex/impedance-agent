@@ -1,7 +1,6 @@
 # src/core/logging.py
 import logging
 import logging.config  # Add this import
-import sys
 from pathlib import Path
 from typing import Optional
 from rich.logging import RichHandler

@@ -1,6 +1,6 @@
 # src/core/loaders.py
 from pathlib import Path
-from typing import Tuple, Union, Dict
+from typing import Union
 import numpy as np
 import pandas as pd
 from .models import ImpedanceData
