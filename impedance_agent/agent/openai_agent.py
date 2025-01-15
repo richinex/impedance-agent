@@ -146,9 +146,9 @@ class OpenAIAgent(BaseAgent):
             "- Strong correlation does NOT mean overparameterization unless uncertainties are huge\n"
             "- Use DRT to guide improvements\n"
             "- Consider physical meaning of parameters and processes\n"
-            "- END analysis report with: \"NOTICE TO RESEARCHERS: LLMs hallucinate. All analyses and "
+            '- END analysis report with: "NOTICE TO RESEARCHERS: LLMs hallucinate. All analyses and '
             "recommendations are intended as guidance to be evaluated alongside physical understanding "
-            "and domain expertise.\""
+            'and domain expertise."'
         )
 
     def get_user_prompt(self, data: ImpedanceData, model_config: Optional[Dict]) -> str:
@@ -182,8 +182,10 @@ class OpenAIAgent(BaseAgent):
             prompt += "- Analyze residuals (real and imaginary) to assess fit quality\n"
             prompt += "- Provide overall assessment of data quality and reliability\n"
 
-        prompt += "\n\nEnsure that residuals (both real and imaginary) are included in "
+        prompt += (
+            "\n\nEnsure that residuals (both real and imaginary) are included in "
             "the analysis and evaluation of the fits."
+        )
 
         return prompt
 

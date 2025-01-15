@@ -13,6 +13,7 @@ import typer
 
 # Matplotlib imports (with config)
 import matplotlib
+
 matplotlib.use("Agg")  # Use non-interactive backend
 import matplotlib.pyplot as plt
 
@@ -42,7 +43,7 @@ async def run_async_tasks(
                 ResultExporter.export_async(result, output_path, output_format),
                 ResultExporter.export_async(
                     result, Path(output_path).parent / "analysis_summary.md", "md"
-                )
+                ),
             )
 
         if plot and plot_dir:
@@ -136,7 +137,9 @@ def analyze(
         async def load_data_and_config():
             with ThreadPoolExecutor(max_workers=2) as pool:
                 loop = asyncio.get_running_loop()
-                data_future = loop.run_in_executor(pool, ImpedanceLoader.load, data_path)
+                data_future = loop.run_in_executor(
+                    pool, ImpedanceLoader.load, data_path
+                )
 
                 if ecm:
                     config_future = loop.run_in_executor(pool, Config.load_model, ecm)
@@ -199,12 +202,14 @@ def analyze(
                 pending = asyncio.all_tasks(loop)
                 for task in pending:
                     task.cancel()
-                loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+                loop.run_until_complete(
+                    asyncio.gather(*pending, return_exceptions=True)
+                )
             except Exception as e:
                 logger.error(f"Error during task cleanup: {str(e)}")
 
         # Close plots and loop
-        plt.close('all')
+        plt.close("all")
         if loop and not loop.is_closed():
             loop.close()
 

@@ -232,7 +232,6 @@ class DRTFitter:
 
         return jnp.flip(self.rpol * z_mod)
 
-
     def tikh_residual_norm(self, g_vector, lam_t, a_mat_t_a, b_rhs, id_matrix):
         """Compute norm of Tikhonov residual and LHS norm."""
         lhs_matrix = a_mat_t_a + lam_t * id_matrix
