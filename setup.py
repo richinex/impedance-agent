@@ -46,8 +46,11 @@ setup(
             "mypy>=1.5.1",
             "sphinx>=7.0.0",
             "sphinx-rtd-theme>=1.3.0",
+            "sphinx-autoapi>=3.0.0",  # Added for better API documentation
+            "myst-parser>=2.0.0",     # Added for Markdown support in docs
             "tox>=4.11.0",
             "openpyxl>=3.1.0",
+            "pytest-asyncio>=0.23.0",  # Added for async test support
         ],
     },
     entry_points={
@@ -89,7 +92,8 @@ setup(
     project_urls={
         "Bug Reports": "https://github.com/richinex/impedance-agent/issues",
         "Source": "https://github.com/richinex/impedance-agent",
-        "Documentation": "https://github.com/richinex/impedance-agent/docs",
+        "Documentation": "https://richinex.github.io/impedance-agent/",
+        "Release Notes": "https://github.com/richinex/impedance-agent/releases",
     },
     license=__license__,
 )
