@@ -39,7 +39,7 @@ exclude_patterns = []
 # HTML output options
 html_theme = 'sphinx_rtd_theme'  # Use ReadTheDocs theme instead of alabaster
 html_static_path = ['_static']
-html_title = 'Impedance Agent Documentation'
+html_title = project
 
 # Intersphinx mapping
 intersphinx_mapping = {

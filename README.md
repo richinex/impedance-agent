@@ -151,11 +151,11 @@ If you use this tool in your research, please cite:
 
 If you find this tool useful, consider buying me a coffee:
 
-[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/YOUR_USERNAME)
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/richinex)
 
 ## Documentation
 
-For detailed documentation, visit: [Documentation Link]
+For detailed documentation, see the [docs](https://richinex.github.io/impedance-agent/)
 
 ## Acknowledgments
 

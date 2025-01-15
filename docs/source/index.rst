@@ -1,4 +1,4 @@
-Welcome to Impedance Agent's Documentation
+Impedance Agent
 ==========================================
 
 A Python package for automated impedance spectroscopy analysis.
