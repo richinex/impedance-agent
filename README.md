@@ -67,13 +67,13 @@ cp impedance_agent/.env.example .env
 #### If Package is Installed
 
 ```bash
-impedance-agent analyze data/impedance.txt
+impedance-agent analyze examples/data/impedance.txt
 ```
 
 #### With ECM Fitting
 
 ```bash
-impedance-agent analyze data/impedance.txt --ecm configs/models/randles.yaml
+impedance-agent analyze examples/data/impedance.txt --ecm examples/models/randles.yaml
 ```
 
 #### If Using Repository Directly
@@ -85,7 +85,7 @@ python -m impedance_agent.src.cli.main data/impedance.txt
 #### With ECM Fitting
 
 ```bash
-python -m impedance_agent.src.cli.main data/impedance.txt --ecm configs/models/randles.yaml
+python -m impedance_agent.src.cli.main examples/data/impedance.txt --ecm examples/models/randles.yaml
 ```
 
 ### Full Options
