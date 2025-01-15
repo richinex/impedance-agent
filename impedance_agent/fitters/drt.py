@@ -1,5 +1,5 @@
 # src/fitters/drt.py
-import logging
+from typing import Optional  # Keep only what's needed
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -7,8 +7,7 @@ from jaxopt import ProjectedGradient
 from jaxopt.projection import projection_non_negative
 from scipy.signal import find_peaks, peak_widths
 from scipy.optimize import least_squares
-from typing import Optional, Dict, Tuple
-from ..core.models import ImpedanceData, DRTResult
+from ..core.models import DRTResult  # Remove ImpedanceData if unused
 
 
 class DRTFitter:
@@ -356,6 +355,6 @@ class DRTFitter:
             self.logger.debug(f"Created DRTResult object with {len(peak_freqs)} peaks")
             return result
 
-        except Exception as e:
+        except Exception:
             self.logger.error("DRT fitting failed", exc_info=True)
             return None

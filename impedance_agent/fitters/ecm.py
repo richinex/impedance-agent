@@ -312,7 +312,7 @@ class ECMFitter:
 
             self.logger.info(f"Fit metrics: χ² = {wrss:.6e}, AIC = {aic:.6e}")
             self.logger.debug(
-                f"Parameter uncertainties:\n"
+                "Parameter uncertainties:\n"  # Changed to regular string
                 + "\n".join(
                     [f"{p['name']}: {err:.6e}" for p, err in zip(self.param_info, perr)]
                 )
