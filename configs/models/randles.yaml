@@ -1,0 +1,30 @@
+# configs/models/randles.yaml
+model_code: |
+  def impedance_model(p, f):
+    w = 2 * jnp.pi * f
+    Rs, Rct, Cdl = p
+    Z = Rs + Rct / (1 + 1j * w * Cdl * Rct)
+    return jnp.concatenate([Z.real, Z.imag])
+
+variables:
+  - name: Rs
+    initialValue: 0.1
+    lowerBound: 1e-6
+    upperBound: 1e3
+    description: "Series resistance"
+    units: "ohm"
+  - name: Rct
+    initialValue: 1.0
+    lowerBound: 1e-6
+    upperBound: 1e6
+    description: "Charge transfer resistance"
+    units: "ohm"
+  - name: Cdl
+    initialValue: 1e-6
+    lowerBound: 1e-12
+    upperBound: 1e-3
+    description: "Double layer capacitance"
+    units: "F"
+
+weighting:
+  type: modulus

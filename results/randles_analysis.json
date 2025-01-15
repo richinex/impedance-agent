@@ -1,0 +1,438 @@
+{
+  "ecm_fit": {
+    "parameters": [
+      20.660011714277704,
+      6.5069677432815585,
+      9.07010235411135e-07
+    ],
+    "errors": [
+      0.4391153328577766,
+      0.5227964337567933,
+      1.954106792569015e-07
+    ],
+    "param_info": [
+      {
+        "name": "Rs",
+        "initialValue": 0.1,
+        "lowerBound": 1e-06,
+        "upperBound": 1000.0
+      },
+      {
+        "name": "Rct",
+        "initialValue": 1.0,
+        "lowerBound": 1e-06,
+        "upperBound": 1000000.0
+      },
+      {
+        "name": "Cdl",
+        "initialValue": 1e-06,
+        "lowerBound": 1e-12,
+        "upperBound": 0.001
+      }
+    ],
+    "chi_square": 0.4051677178472902,
+    "aic": 359.4341433700729,
+    "wrms": 0.004657100205141267,
+    "dof": 87,
+    "measurement_id": null,
+    "timestamp": null
+  },
+  "drt_fit": {
+    "tau": [
+      3.183098861837907e-07,
+      4.0072801847067236e-07,
+      5.044866475800143e-07,
+      6.35110749227417e-07,
+      7.995566182638647e-07,
+      1.0065834972987549e-06,
+      1.2672126812232648e-06,
+      1.5953223683200303e-06,
+      2.0083909785083644e-06,
+      2.5284160849593755e-06,
+      3.183098861837907e-06,
+      4.007275139851078e-06,
+      5.044850484718376e-06,
+      6.351082148163186e-06,
+      7.995526015015717e-06,
+      1.0065771311507153e-05,
+      1.2672076363859656e-05,
+      1.5952983821169282e-05,
+      2.0083909785083645e-05,
+      2.528476337944163e-05,
+      3.183098861837907e-05,
+      4.0074264910460867e-05,
+      5.044530684370692e-05,
+      6.350955430642272e-05,
+      7.995726857166307e-05,
+      0.00010066726318272949,
+      0.00012671571902220967,
+      0.00015955382766104796,
+      0.000200826426614379,
+      0.0002542411231499926,
+      0.00032055376252144074,
+      0.0004039465560708004,
+      0.0004997015481692161,
+      0.0006353490742191431,
+      0.0007977691383052398,
+      0.0010137257521776774,
+      0.0012939426267633768,
+      0.001977080038408638,
+      0.002506377056565281,
+      0.0034226869482128033,
+      0.004188287976102509,
+      0.005395082816674419,
+      0.007578806813899778,
+      0.012732395447351627,
+      0.039788735772973836
+    ],
+    "gamma": [
+      1.0481582368509991e-09,
+      0.0,
+      3.7762888833606643e-07,
+      2.384653146180337e-05,
+      0.009848543178792567,
+      0.24257818690817207,
+      0.3073231944934945,
+      0.2558340238378204,
+      0.15329024999684038,
+      0.057628866274502755,
+      0.004262903527951608,
+      0.0006431521995980252,
+      0.031072206857276036,
+      0.06849118963157876,
+      0.12865696811356633,
+      0.12664202707732025,
+      0.05813829317932994,
+      0.016728984898631817,
+      1.6491803939910523e-09,
+      6.752526911026088e-05,
+      0.0005616120049473166,
+      0.0034218521508710283,
+      0.029389937877396567,
+      0.07582972212991025,
+      0.07644333970082327,
+      0.08214869021767163,
+      0.06227738761813024,
+      0.061117356091482264,
+      0.05313305588270083,
+      0.03991808914746505,
+      0.021828958626460972,
+      0.006025076069421668,
+      0.07215180515911664,
+      0.09655027840465844,
+      0.08842158893509855,
+      0.06795345996660952,
+      0.09515782582951701,
+      0.046278688140489965,
+      0.025147168941007055,
+      0.02191724711490369,
+      0.017639975313046282,
+      0.399622975101842,
+      0.02437800198039892,
+      0.0883265511605868,
+      0.7476635082379256
+    ],
+    "peak_frequencies": [
+      29.5,
+      122.99999999999999,
+      250.49999999999997,
+      1581.0000000000002,
+      19905.5,
+      125594.50000000001
+    ],
+    "peak_polarizations": [
+      0.12251458616321316,
+      0.016432161877150814,
+      0.1369552814688908,
+      0.1167139554554359,
+      0.09524452640584774,
+      0.3364441209575217
+    ],
+    "regularization_param": 2.5301887706968225e-13,
+    "residual": 1.2224285408490292
+  },
+  "linkk_fit": {
+    "M": 22,
+    "mu": 0.6114710903130285,
+    "Z_fit": [
+      {
+        "real": 19.493487947461052,
+        "imag": -1.287116185139208
+      },
+      {
+        "real": 19.741060454130018,
+        "imag": -1.469384940363257
+      },
+      {
+        "real": 20.01041155271408,
+        "imag": -1.631579325602423
+      },
+      {
+        "real": 20.299611156478342,
+        "imag": -1.7794064160105887
+      },
+      {
+        "real": 20.612514326406437,
+        "imag": -1.9159358601174508
+      },
+      {
+        "real": 20.95491696152013,
+        "imag": -2.0372931323166092
+      },
+      {
+        "real": 21.32829287780401,
+        "imag": -2.1325607604324928
+      },
+      {
+        "real": 21.72502990526449,
+        "imag": -2.1888393805369386
+      },
+      {
+        "real": 22.12926194640758,
+        "imag": -2.1988914854826387
+      },
+      {
+        "real": 22.523787423553607,
+        "imag": -2.1653062745124663
+      },
+      {
+        "real": 22.897102405757273,
+        "imag": -2.09712900846734
+      },
+      {
+        "real": 23.24363826400227,
+        "imag": -2.003160612981932
+      },
+      {
+        "real": 23.558856018355883,
+        "imag": -1.8901556379779418
+      },
+      {
+        "real": 23.837539112681597,
+        "imag": -1.7670203137674116
+      },
+      {
+        "real": 24.07881744902993,
+        "imag": -1.6468363668903463
+      },
+      {
+        "real": 24.290302900917162,
+        "imag": -1.5409969366256437
+      },
+      {
+        "real": 24.48309780917691,
+        "imag": -1.451973200121508
+      },
+      {
+        "real": 24.66217274153763,
+        "imag": -1.3755095352293296
+      },
+      {
+        "real": 24.825041695509675,
+        "imag": -1.3109480044780726
+      },
+      {
+        "real": 24.971435964903687,
+        "imag": -1.266047171899974
+      },
+      {
+        "real": 25.111279958759145,
+        "imag": -1.2486817543573772
+      },
+      {
+        "real": 25.25925522513639,
+        "imag": -1.2560026125972679
+      },
+      {
+        "real": 25.421965676357704,
+        "imag": -1.2757942605587884
+      },
+      {
+        "real": 25.595047344378308,
+        "imag": -1.2985096153276123
+      },
+      {
+        "real": 25.771765582364306,
+        "imag": -1.324343033447563
+      },
+      {
+        "real": 25.95225073259466,
+        "imag": -1.3577453894114175
+      },
+      {
+        "real": 26.140852565693876,
+        "imag": -1.3986353449060223
+      },
+      {
+        "real": 26.339077904859423,
+        "imag": -1.4427017901974544
+      },
+      {
+        "real": 26.542599250471884,
+        "imag": -1.488080107384902
+      },
+      {
+        "real": 26.75471739211437,
+        "imag": -1.5397219683475147
+      },
+      {
+        "real": 26.969623881534638,
+        "imag": -1.5988693743493798
+      },
+      {
+        "real": 27.193843447188577,
+        "imag": -1.6643917428865245
+      },
+      {
+        "real": 27.407113480166927,
+        "imag": -1.7277837240665646
+      },
+      {
+        "real": 27.65094314823851,
+        "imag": -1.805634125874136
+      },
+      {
+        "real": 27.88487319597163,
+        "imag": -1.8936383976065154
+      },
+      {
+        "real": 28.141628843066904,
+        "imag": -2.007548700445908
+      },
+      {
+        "real": 28.42310035487181,
+        "imag": -2.1442863451700367
+      },
+      {
+        "real": 28.96126746045183,
+        "imag": -2.4201829113815485
+      },
+      {
+        "real": 29.286500837074616,
+        "imag": -2.6013390781247887
+      },
+      {
+        "real": 29.74741512819685,
+        "imag": -2.879558788222557
+      },
+      {
+        "real": 30.070844420512532,
+        "imag": -3.085935653766777
+      },
+      {
+        "real": 30.505819801563167,
+        "imag": -3.3774843567888597
+      },
+      {
+        "real": 31.15061127984297,
+        "imag": -3.8413959065391423
+      },
+      {
+        "real": 32.32707712429036,
+        "imag": -4.728338173165892
+      },
+      {
+        "real": 36.02415721136127,
+        "imag": -7.501944892102886
+      }
+    ],
+    "residuals_real": [
+      0.00018138499978529262,
+      -0.0003587592848845659,
+      0.00019807956957560655,
+      -0.00026856502397985577,
+      -5.1127086295104546e-05,
+      -0.0002712800617699638,
+      -0.0002806642373132247,
+      -0.00016883682078647964,
+      0.00048149248321528075,
+      -0.00011789699671188452,
+      -7.716941802711138e-06,
+      -3.430760487018106e-05,
+      -8.406080290039093e-05,
+      9.393668769073311e-05,
+      0.0007654182674740369,
+      -0.0003782079381634905,
+      0.0005847411148135714,
+      -0.0002963980756673341,
+      -0.00018850286497232316,
+      0.00035922568385220736,
+      -0.0006899523310958455,
+      -0.0002976492331156436,
+      -1.442811943575811e-05,
+      -0.000420318661769885,
+      0.00011341205983630555,
+      0.00019448620445486648,
+      0.0003875267059342891,
+      -0.0003919371746178059,
+      6.598444108987742e-05,
+      0.00012031975124783764,
+      0.00032407632447412814,
+      -0.0002709243507943889,
+      -0.00015947190621988926,
+      0.000719124686278645,
+      0.0003311142628069056,
+      0.00013246443224164108,
+      0.00019131033621516032,
+      -1.1418764922476484e-05,
+      -0.0008002324197796303,
+      0.00010626848761660952,
+      -0.0006632913737836384,
+      0.00028515440113384183,
+      0.0007638942548817633,
+      0.00011740487878835223,
+      -2.018122429432872e-05
+    ],
+    "residuals_imag": [
+      -0.00021852591308333552,
+      -1.5582837418246787e-05,
+      0.0003328581741143164,
+      -0.00018320617089146878,
+      -0.0006348208780978586,
+      0.00046630854210805286,
+      0.0005977228029826955,
+      6.617873804168219e-05,
+      2.9204889400286814e-05,
+      0.0002518898608047084,
+      3.6236517299127894e-05,
+      5.735985440980109e-05,
+      0.0003914517311221018,
+      0.0003868074104214233,
+      -0.0002444666442595506,
+      0.00018342325824292647,
+      -0.0004157817493066173,
+      0.00023234314037362175,
+      -0.0003898417590769527,
+      5.4944577422932495e-05,
+      -0.00041830447613251464,
+      0.0005104764159206847,
+      0.00030232228804535254,
+      0.00011299258311815668,
+      0.0004282633579313448,
+      0.00024188998868473338,
+      0.0005269199139230301,
+      -0.00040579172630860724,
+      0.0003044296855735803,
+      0.0001464387771018503,
+      0.0003224092784768078,
+      0.0002842611977381665,
+      -0.00028816571849263903,
+      0.0008566940795763445,
+      -0.00017192282938929338,
+      -0.00035104660012200286,
+      -0.00013304469034225382,
+      -0.0006123031891880187,
+      -0.00016704658062380033,
+      0.0005739739380699221,
+      0.0003895520522207084,
+      0.000263814520903808,
+      0.0003674332789227605,
+      -0.0004205583830980946,
+      -3.792072822738418e-05
+    ],
+    "max_residual": 0.0011185101968227734,
+    "mean_residual": 0.0004563709750012444
+  },
+  "summary": "### Detailed Interpretation of Results\n\n---\n\n#### **1. Data Quality Assessment**\n- **Lin-KK Validation Results and Implications**:\n  - The Lin-KK validation indicates good data quality, with residuals in both real and imaginary components being small (mean residual = 0.000456, max residual = 0.00112). This suggests the data is Kramers-Kronig compliant, meaning it is consistent with the principles of causality, linearity, and stability.\n  - The number of RC elements (M = 22) and regularization parameter (\u03bc = 0.611) indicate a moderately complex system with multiple time constants, but the residuals are well-controlled, confirming reliable data.\n\n- **Quality Metrics**:\n  - The residuals are uniformly distributed across the frequency range, with no systematic deviations or artifacts. This suggests the measurement setup and data acquisition were robust.\n  - The small residuals and high compliance with Kramers-Kronig relations confirm the data is suitable for further analysis.\n\n- **Identification of Measurement Artifacts**:\n  - No significant measurement artifacts were detected. The residuals are random and do not show any frequency-dependent trends or outliers.\n\n- **Overall Reliability Assessment**:\n  - The data is highly reliable, with excellent compliance to Kramers-Kronig relations and well-behaved residuals. This provides confidence in the subsequent DRT and ECM analyses.\n\n---\n\n#### **2. Quantitative Assessment of Fits**\n- **DRT Analysis**:\n  - The DRT analysis identified six distinct peaks at frequencies: 29.5 Hz, 123 Hz, 250 Hz, 1.58 kHz, 19.9 kHz, and 125.6 kHz. These peaks correspond to different electrochemical processes with varying polarization contributions.\n  - The regularization parameter (\u03bb = 2.53e-13) and residual (1.22) indicate a high-quality fit, with the DRT capturing the underlying processes effectively.\n  - The peak polarizations range from 0.016 to 0.336, with the strongest peak at 125.6 kHz, suggesting a dominant high-frequency process.\n\n- **ECM Fitting**:\n  - The ECM fitting yielded the following parameters:\n    - Rs = 20.66 \u00b1 0.44 \u03a9 (solution resistance)\n    - Rct = 6.51 \u00b1 0.52 \u03a9 (charge transfer resistance)\n    - Cdl = 0.907 \u00b1 0.195 \u03bcF (double-layer capacitance)\n  - The chi-square (0.405) and AIC (359.43) values indicate a good fit, with the weighted root mean square (WRMS) error being 0.00466, confirming the model's accuracy.\n  - The ECM parameters are physically reasonable and within expected bounds.\n\n- **Overall Quality of Analyses**:\n  - Both DRT and ECM analyses are consistent and of high quality, with residuals and fitting metrics indicating reliable results.\n\n---\n\n#### **3. Physical Interpretation**\n- **DRT Peaks and Their Likely Origins**:\n  - **29.5 Hz**: Likely corresponds to a low-frequency process, possibly related to diffusion or a slow electrochemical reaction.\n  - **123 Hz and 250 Hz**: These mid-frequency peaks may represent intermediate processes, such as adsorption or surface reactions.\n  - **1.58 kHz**: This peak could be associated with charge transfer processes at the electrode-electrolyte interface.\n  - **19.9 kHz and 125.6 kHz**: These high-frequency peaks are likely related to double-layer charging and other fast electrochemical processes.\n\n- **Relationship Between Adjacent or Overlapping Peaks**:\n  - The peaks are well-separated, indicating distinct processes. However, the peaks at 123 Hz and 250 Hz may overlap slightly, suggesting related but distinct mechanisms.\n\n- **ECM Parameters in Context**:\n  - The solution resistance (Rs = 20.66 \u03a9) is consistent with a moderately conductive electrolyte.\n  - The charge transfer resistance (Rct = 6.51 \u03a9) suggests efficient charge transfer kinetics.\n  - The double-layer capacitance (Cdl = 0.907 \u03bcF) is typical for a solid-electrolyte interface.\n\n- **Correlations Between DRT Peaks and ECM Time Constants**:\n  - The DRT peak at 1.58 kHz aligns well with the ECM's charge transfer process (Rct and Cdl), confirming the physical relevance of the ECM parameters.\n  - The high-frequency DRT peaks (19.9 kHz and 125.6 kHz) correspond to the double-layer charging process captured by Cdl in the ECM.\n\n- **Overall System Behavior Across Frequency Ranges**:\n  - The system exhibits a mix of low-frequency diffusion/mass transport, mid-frequency surface reactions, and high-frequency double-layer charging, consistent with typical electrochemical systems.\n\n---\n\n#### **4. Critical Evaluation**\n- **Model Adequacy Compared to DRT Complexity**:\n  - The ECM, while simple, captures the dominant processes identified by the DRT. However, the DRT reveals additional complexity (six peaks) that the ECM does not fully represent. This suggests the ECM could be refined to include additional elements.\n\n- **Parameter Uncertainties and Their Implications**:\n  - The uncertainties in Rs, Rct, and Cdl are small, indicating robust parameter estimation. However, the DRT suggests additional processes that are not accounted for in the ECM, which could introduce some bias.\n\n- **Frequency-Dependent Behaviors and Trends**:\n  - The data shows clear frequency-dependent behavior, with distinct processes dominating at low, mid, and high frequencies. This is consistent with the DRT and ECM results.\n\n- **Possible Measurement Artifacts or System Limitations**:\n  - No significant artifacts were detected. However, the system's complexity (as revealed by the DRT) suggests that additional measurements or a more detailed model might be beneficial.\n\n- **Consistency Between Lin-KK, DRT, and ECM Results**:\n  - The results are highly consistent across all analyses, with the Lin-KK validation confirming data quality, the DRT revealing multiple processes, and the ECM capturing the dominant processes.\n\n- **Areas Needing Further Investigation**:\n  - The mid-frequency peaks (123 Hz and 250 Hz) warrant further investigation to better understand their physical origins.\n  - The ECM could be extended to include additional RC elements to better match the DRT complexity.\n\n---\n\n#### **5. Recommendations**\n- **Suggested Model Improvements**:\n  - Consider extending the ECM to include additional RC elements to better capture the mid-frequency processes identified by the DRT.\n  - Explore more complex models, such as a transmission line model, if the system involves porous electrodes or diffusion-limited processes.\n\n- **Additional Measurements if Beneficial**:\n  - Perform measurements at lower frequencies (<1 Hz) to better characterize the low-frequency diffusion process.\n  - Conduct temperature-dependent measurements to investigate the kinetics of the identified processes.\n\n- **Parameter Optimization Strategies**:\n  - Use the DRT results to guide the selection of initial parameter values for ECM fitting, improving convergence and accuracy.\n  - Perform sensitivity analysis to identify the most influential parameters and refine their estimation.\n\n- **System Design or Operation Insights**:\n  - The low Rct value suggests efficient charge transfer, which could be leveraged to optimize system performance.\n  - The double-layer capacitance (Cdl) could be further optimized to enhance energy storage or power delivery capabilities.\n\n---\n\n### Summary\nThe impedance data is of high quality, with excellent Kramers-Kronig compliance and well-behaved residuals. The DRT analysis reveals six distinct processes, while the ECM captures the dominant charge transfer and double-layer charging processes. The results are consistent across all analyses, but the DRT suggests additional complexity that could be addressed with a more detailed model. Overall, the system exhibits typical electrochemical behavior, with opportunities for further optimization and investigation.",
+  "recommendations": []
+}

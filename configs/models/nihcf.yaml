@@ -1,0 +1,104 @@
+# configs/models/nihcf.yaml
+model_code: |
+  def impedance_model(p, f):
+    w = 2*jnp.pi*f
+    Rs = p[0]
+    Qh = p[1]*p[10]
+    nh = p[2]
+    Rad = p[3]/p[10]
+    Wad = p[4]/p[10]
+    Cad = p[5]*p[10]
+    Rint = p[6]/p[10]
+    Wint = p[7]/p[10]
+    tau = p[8]
+    alpha = p[9]
+    Rp = p[10]
+    Ct = (1/Cad)**-1
+    Zad = Rad + Wad/jnp.sqrt(1j*w)
+    Zint = Rint + Wint/((1j*w*tau)**(alpha/2)) * 1/(jnp.tanh((1j*w*tau)**(alpha/2)))
+    Yf = (Zad + (1j*w*Ct)**-1)/(Zad*Zint + (Zad+Zint)*(1j*w*Ct)**-1)
+    Ydl = Qh*((1j*w)**nh)
+    Kl = jnp.sqrt(Ydl + Yf)
+    Z = Rs + Rp * jnp.tanh(Kl)**-1 / Kl
+    return jnp.concatenate([Z.real, Z.imag], axis = 0)
+
+variables:
+  - name: Rs
+    initialValue: 1.0
+    lowerBound: 1e-6
+    upperBound: 1e3
+    description: "Series resistance"
+    units: "ohm"
+
+  - name: Qh
+    initialValue: 1e-6
+    lowerBound: 1e-12
+    upperBound: 1e-3
+    description: "CPE parameter"
+    units: "F⋅s^(n-1)"
+
+  - name: nh
+    initialValue: 0.8
+    lowerBound: 0
+    upperBound: 1
+    description: "CPE exponent"
+    units: "dimensionless"
+
+  - name: Rad
+    initialValue: 1.0
+    lowerBound: 1e-6
+    upperBound: 1e6
+    description: "Adsorption resistance"
+    units: "ohm"
+
+  - name: Wad
+    initialValue: 1.0
+    lowerBound: 1e-6
+    upperBound: 1e6
+    description: "Warburg coefficient (adsorption)"
+    units: "ohm⋅s^(-1/2)"
+
+  - name: Cad
+    initialValue: 1e-6
+    lowerBound: 1e-12
+    upperBound: 1e-3
+    description: "Adsorption capacitance"
+    units: "F"
+
+  - name: Rint
+    initialValue: 1.0
+    lowerBound: 1e-6
+    upperBound: 1e6
+    description: "Interface resistance"
+    units: "ohm"
+
+  - name: Wint
+    initialValue: 1.0
+    lowerBound: 1e-6
+    upperBound: 1e6
+    description: "Warburg coefficient (interface)"
+    units: "ohm⋅s^(-α/2)"
+
+  - name: tau
+    initialValue: 1.0
+    lowerBound: 1e-6
+    upperBound: 1e6
+    description: "Time constant"
+    units: "s"
+
+  - name: alpha
+    initialValue: 0.5
+    lowerBound: 0
+    upperBound: 1
+    description: "Warburg exponent"
+    units: "dimensionless"
+
+  - name: Rp
+    initialValue: 1.0
+    lowerBound: 1e-6
+    upperBound: 1e6
+    description: "Polarization resistance"
+    units: "ohm"
+
+weighting:
+  type: modulus
