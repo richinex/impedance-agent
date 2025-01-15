@@ -2,7 +2,7 @@
 # impedance_agent/agent/analysis.py
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, Any
 import asyncio
 import logging
 from ..core.models import (

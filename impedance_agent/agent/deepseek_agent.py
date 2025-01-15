@@ -5,7 +5,6 @@ from openai import OpenAI
 from .base import BaseAgent
 from ..core.env import env
 from ..core.models import ImpedanceData
-import logging
 
 
 class DeepSeekAgent(BaseAgent):

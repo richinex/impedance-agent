@@ -1,5 +1,6 @@
 # src/agent/tools/fitter_tools.py
-from typing import Dict, Any, Optional, List
+from typing import Optional
+import traceback
 import numpy as np
 import jax.numpy as jnp
 from ...core.models import (

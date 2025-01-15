@@ -1,8 +1,6 @@
 # impedance_agent/agent/base.py
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional
-from openai import OpenAI
-from ..core.env import env
 from ..core.models import ImpedanceData
 from ..agent.tools.fitter_tools import FitterTools
 import logging
