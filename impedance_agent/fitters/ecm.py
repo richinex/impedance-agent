@@ -4,7 +4,7 @@ import jaxopt
 import jax.numpy as jnp
 import numpy as np
 import logging
-from typing import Optional, Tuple Any
+from typing import Optional, Tuple, Any
 from ..core.models import ImpedanceData, FitResult, FitQualityMetrics
 
 
