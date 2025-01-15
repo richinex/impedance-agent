@@ -1,12 +1,17 @@
 from setuptools import setup, find_packages
 
+# Read version from __version__.py
+with open("impedance_agent/__version__.py", "r") as f:
+    exec(f.read())
+
+# Read README for long description
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name="impedance-agent",
-    version="0.1.0",
-    author="Richard Chukwu",
+    version=__version__,
+    author=__author__,
     author_email="",
     description="AI-powered CLI tool for electrochemical impedance spectroscopy analysis",
     long_description=long_description,
@@ -76,11 +81,15 @@ setup(
         "impedance",
         "spectroscopy",
         "EIS",
-        "AI",
+        "AI-agents",
         "CLI",
+        "llm-workflows",
+        "data-analysis",
     ],
     project_urls={
         "Bug Reports": "https://github.com/richinex/impedance-agent/issues",
         "Source": "https://github.com/richinex/impedance-agent",
+        "Documentation": "https://github.com/richinex/impedance-agent/docs",
     },
+    license=__license__,
 )
