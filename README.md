@@ -44,10 +44,12 @@ impedance-agent data/impedance.txt --ecm configs/models/randles.yaml
 
 ### Full Options
 
+To run the examples use
+
 ```bash
 python -m src.cli.main \
-  data/impedance.txt \
-  --ecm configs/models/randles.yaml \
+  examples/data/impedance.txt \
+  --ecm examples/models/randles.yaml \
   --output-path results/analysis.json \
   --output-format json \
   --plot-format png \
