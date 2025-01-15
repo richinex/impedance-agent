@@ -4,7 +4,7 @@ import jaxopt
 import jax.numpy as jnp
 import numpy as np
 import logging
-from typing import Optional, Tuple, Any
+from typing import Optional, Tuple
 from ..core.models import ImpedanceData, FitResult, FitQualityMetrics
 
 
@@ -320,6 +320,6 @@ class ECMFitter:
 
             return result
 
-        except Exception as e:
+        except Exception:
             self.logger.error("ECM fitting failed", exc_info=True)
             return None

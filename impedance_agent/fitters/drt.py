@@ -7,7 +7,8 @@ from jaxopt import ProjectedGradient
 from jaxopt.projection import projection_non_negative
 from scipy.signal import find_peaks, peak_widths
 from scipy.optimize import least_squares
-from ..core.models import DRTResult  # Remove ImpedanceData if unused
+from ..core.models import DRTResult
+import logging
 
 
 class DRTFitter:
