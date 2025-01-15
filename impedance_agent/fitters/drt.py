@@ -1,5 +1,5 @@
 # src/fitters/drt.py
-from typing import Optional  # Keep only what's needed
+from typing import Optional, Tuple  # Keep only what's needed
 import jax
 import jax.numpy as jnp
 import numpy as np
