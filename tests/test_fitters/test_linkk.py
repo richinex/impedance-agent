@@ -4,25 +4,24 @@ import numpy as np
 from impedance_agent.core.models import ImpedanceData, LinKKResult
 from impedance_agent.fitters.linkk import LinKKFitter
 
+
 @pytest.fixture
 def simple_rc_data():
     """Generate synthetic RC circuit data that should be KK-compliant"""
     freq = np.logspace(-2, 5, 50)
     R = 100.0  # Resistance in ohms
-    C = 1e-6   # Capacitance in farads
+    C = 1e-6  # Capacitance in farads
     w = 2 * np.pi * freq
     Z = R / (1 + 1j * w * R * C)
 
-    return ImpedanceData(
-        frequency=freq,
-        real=Z.real,
-        imaginary=Z.imag
-    )
+    return ImpedanceData(frequency=freq, real=Z.real, imaginary=Z.imag)
+
 
 @pytest.fixture
 def linkk_fitter(simple_rc_data):
     """Create LinKK fitter instance"""
     return LinKKFitter(data=simple_rc_data)
+
 
 def test_linkk_initialization(simple_rc_data):
     """Test LinKK fitter initialization"""
@@ -32,6 +31,7 @@ def test_linkk_initialization(simple_rc_data):
     assert np.array_equal(fitter.freq, simple_rc_data.frequency)
     assert np.array_equal(fitter.Z.real, simple_rc_data.real)
     assert np.array_equal(fitter.Z.imag, simple_rc_data.imaginary)
+
 
 def test_linkk_fitting(linkk_fitter):
     """Test LinKK fitting with RC circuit data"""
@@ -52,6 +52,7 @@ def test_linkk_fitting(linkk_fitter):
     assert len(result.residuals_real) == len(linkk_fitter.freq)
     assert len(result.residuals_imag) == len(linkk_fitter.freq)
 
+
 def test_linkk_parameters(linkk_fitter):
     """Test LinKK fitting with different parameters"""
     # Test with different cutoff ratios
@@ -69,19 +70,23 @@ def test_linkk_parameters(linkk_fitter):
     assert result3 is not None
     assert result3.M <= 10
 
+
 def test_linkk_with_noisy_data(simple_rc_data):
     """Test LinKK fitting with noisy data"""
     # Generate noisy RC data
     np.random.seed(42)  # For reproducibility
     noise_level = 0.02  # 2% noise
-    Z_noisy = (simple_rc_data.real + 1j * simple_rc_data.imaginary) * \
-              (1 + noise_level * (np.random.randn(len(simple_rc_data.frequency)) + \
-               1j * np.random.randn(len(simple_rc_data.frequency))))
+    Z_noisy = (simple_rc_data.real + 1j * simple_rc_data.imaginary) * (
+        1
+        + noise_level
+        * (
+            np.random.randn(len(simple_rc_data.frequency))
+            + 1j * np.random.randn(len(simple_rc_data.frequency))
+        )
+    )
 
     noisy_data = ImpedanceData(
-        frequency=simple_rc_data.frequency,
-        real=Z_noisy.real,
-        imaginary=Z_noisy.imag
+        frequency=simple_rc_data.frequency, real=Z_noisy.real, imaginary=Z_noisy.imag
     )
 
     fitter = LinKKFitter(data=noisy_data)
@@ -90,18 +95,20 @@ def test_linkk_with_noisy_data(simple_rc_data):
     assert result is not None
     assert result.mean_residual < 0.5  # Relaxed threshold for noisy data
 
+
 def test_linkk_error_handling():
     """Test LinKK error handling"""
     # Test with invalid frequency data (single point)
     invalid_data = ImpedanceData(
         frequency=np.array([1.0]),  # Single frequency point
         real=np.array([1.0]),
-        imaginary=np.array([0.0])
+        imaginary=np.array([0.0]),
     )
 
     fitter = LinKKFitter(data=invalid_data)
     result = fitter.fit()
     assert result is None  # Should return None for invalid data
+
 
 def test_linkk_consistency(linkk_fitter):
     """Test consistency of LinKK results"""

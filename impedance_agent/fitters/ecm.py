@@ -7,8 +7,19 @@ import logging
 from typing import Optional, Tuple, Dict, Any, List
 from ..core.models import ImpedanceData, FitResult, FitQualityMetrics
 
+
 class ECMFitter:
-    def __init__(self, model_func, p0, freq, impedance_data: ImpedanceData, lb, ub, param_info, weighting="modulus"):
+    def __init__(
+        self,
+        model_func,
+        p0,
+        freq,
+        impedance_data: ImpedanceData,
+        lb,
+        ub,
+        param_info,
+        weighting="modulus",
+    ):
         """Initialize ECM fitter with model and data"""
         self.logger = logging.getLogger(__name__)
         jax.config.update("jax_enable_x64", True)
@@ -20,7 +31,9 @@ class ECMFitter:
         # Store data and setup
         self.impedance_data = impedance_data
         self.freq = freq
-        self.data = jnp.array(impedance_data.real) + 1j * jnp.array(impedance_data.imaginary)
+        self.data = jnp.array(impedance_data.real) + 1j * jnp.array(
+            impedance_data.imaginary
+        )
         self.model = jax.jit(model_func)
         self.p0 = p0
         self.lb = lb
@@ -33,7 +46,9 @@ class ECMFitter:
         # Set up weighting
         self._setup_weighting(weighting)
 
-    def compute_normalized_residuals(self, Z_fit: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def compute_normalized_residuals(
+        self, Z_fit: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Compute normalized residuals using impedance modulus for normalization.
 
@@ -62,11 +77,17 @@ class ECMFitter:
             self.logger.debug("Using custom sigma weighting array")
             self.weighting_name = "sigma"
             weighting = jnp.array(weighting)
-            assert self.data.shape == weighting.shape, "Shape mismatch between data and weight array"
+            assert (
+                self.data.shape == weighting.shape
+            ), "Shape mismatch between data and weight array"
             self.zerr_Re = weighting
             self.zerr_Im = weighting
         elif isinstance(weighting, str):
-            assert weighting.lower() in ["unit", "proportional", "modulus"], f"Invalid weighting type: {weighting}"
+            assert weighting.lower() in [
+                "unit",
+                "proportional",
+                "modulus",
+            ], f"Invalid weighting type: {weighting}"
             self.weighting_name = weighting.lower()
             self.logger.info(f"Using {self.weighting_name} weighting")
             if weighting.lower() == "unit":
@@ -93,7 +114,7 @@ class ECMFitter:
         z_concat = jnp.concatenate([self.data.real, self.data.imag])
         sigma = jnp.concatenate([self.zerr_Re, self.zerr_Im])
         z_model = self.model(p_norm, self.freq)
-        wrss = jnp.sum((1/sigma**2) * (z_concat - z_model)**2)
+        wrss = jnp.sum((1 / sigma**2) * (z_concat - z_model) ** 2)
         return wrss
 
     def compute_aic(self, wrss: float) -> float:
@@ -131,11 +152,11 @@ class ECMFitter:
     def _calculate_uncertainties(self, popt: jnp.ndarray, wrms: float) -> jnp.ndarray:
         """Calculate parameter uncertainties using QR decomposition"""
         grads = jax.jacfwd(self.model)(popt, self.freq)
-        grads_re = grads[:self.num_freq]
-        grads_im = grads[self.num_freq:]
+        grads_re = grads[: self.num_freq]
+        grads_im = grads[self.num_freq :]
 
-        rtwre = jnp.diag(1/self.zerr_Re)
-        rtwim = jnp.diag(1/self.zerr_Im)
+        rtwre = jnp.diag(1 / self.zerr_Re)
+        rtwim = jnp.diag(1 / self.zerr_Im)
         vre = rtwre @ grads_re
         vim = rtwim @ grads_im
 
@@ -222,7 +243,7 @@ class ECMFitter:
         # Filter small singular values
         rcond = jnp.finfo(s.dtype).eps * max(hessian.shape)
         cutoff = rcond * s[0]
-        s_inv = jnp.where(s > cutoff, 1/s, 0)
+        s_inv = jnp.where(s > cutoff, 1 / s, 0)
 
         # Compute covariance matrix as inverse of Hessian
         cov = (Vt.T * s_inv) @ Vt
@@ -236,7 +257,7 @@ class ECMFitter:
     def calculate_fitted_impedance(self, parameters: jnp.ndarray) -> jnp.ndarray:
         """Calculate fitted impedance values from parameters"""
         z_model = self.model(parameters, self.freq)
-        return z_model[:self.num_freq] + 1j * z_model[self.num_freq:]
+        return z_model[: self.num_freq] + 1j * z_model[self.num_freq :]
 
     def compute_fit_quality_metrics(self, Z_fit: np.ndarray) -> FitQualityMetrics:
         """
@@ -252,7 +273,7 @@ class ECMFitter:
         FitQualityMetrics
             Computed quality metrics
         """
-        Z_exp = self.impedance_data.real + 1j*self.impedance_data.imaginary
+        Z_exp = self.impedance_data.real + 1j * self.impedance_data.imaginary
 
         # 1. Vector Difference Analysis
         # Captures magnitude and direction mismatch at each frequency
@@ -272,9 +293,7 @@ class ECMFitter:
         dZ_fit = np.diff(Z_fit)
 
         # Normalize vectors to unit length and compare directions
-        path_diff = np.mean(np.abs(
-            dZ_fit/np.abs(dZ_fit) - dZ_exp/np.abs(dZ_exp)
-        ))
+        path_diff = np.mean(np.abs(dZ_fit / np.abs(dZ_fit) - dZ_exp / np.abs(dZ_exp)))
 
         # Assign path quality
         if path_diff < 0.05:  # 5% average path deviation
@@ -297,8 +316,9 @@ class ECMFitter:
             vector_quality=vector_quality,
             path_deviation=float(path_diff),
             path_quality=path_quality,
-            overall_quality=overall_quality
+            overall_quality=overall_quality,
         )
+
     def fit(self) -> Optional[FitResult]:
         """Perform impedance fitting on the data"""
         try:
@@ -309,21 +329,20 @@ class ECMFitter:
             self.logger.debug(f"Initial parameters (log scale): {p_log}")
 
             # Optimize using BFGS
-            solver = jaxopt.ScipyMinimize(method='BFGS', fun=jax.jit(self.obj_fun))
+            solver = jaxopt.ScipyMinimize(method="BFGS", fun=jax.jit(self.obj_fun))
             sol = solver.run(p_log)
 
             # Get optimized parameters
             popt_log = sol.params
             popt = self.decode(popt_log)
             wrss = sol.state.fun_val
-            wrms = wrss/self.dof
+            wrms = wrss / self.dof
 
             self.logger.info(f"Optimization complete: WRMS = {wrms:.6e}")
 
-            param_info_str = "\n".join([
-                f"{p['name']}: {val:.6e}"
-                for p, val in zip(self.param_info, popt)
-            ])
+            param_info_str = "\n".join(
+                [f"{p['name']}: {val:.6e}" for p, val in zip(self.param_info, popt)]
+            )
             self.logger.debug(f"Optimal parameters:\n{param_info_str}")
 
             # Calculate uncertainties
@@ -356,15 +375,16 @@ class ECMFitter:
                 wrms=float(wrms),
                 dof=self.dof,
                 Z_fit=Z_fit,
-                fit_quality=fit_quality_metrics
+                fit_quality=fit_quality_metrics,
             )
 
-
             self.logger.info(f"Fit metrics: χ² = {wrss:.6e}, AIC = {aic:.6e}")
-            self.logger.debug(f"Parameter uncertainties:\n" + "\n".join([
-                f"{p['name']}: {err:.6e}"
-                for p, err in zip(self.param_info, perr)
-            ]))
+            self.logger.debug(
+                f"Parameter uncertainties:\n"
+                + "\n".join(
+                    [f"{p['name']}: {err:.6e}" for p, err in zip(self.param_info, perr)]
+                )
+            )
 
             return result
 

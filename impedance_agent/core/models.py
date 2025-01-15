@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, ConfigDict
 import numpy as np
 from datetime import datetime
 
+
 class ImpedanceData(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -15,19 +16,21 @@ class ImpedanceData(BaseModel):
     measurement_id: Optional[str] = None
     timestamp: Optional[datetime] = None
 
+
 class FitQualityMetrics(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     # Vector difference metrics
     vector_difference: float  # Overall magnitude/direction mismatch
-    vector_quality: str      # "excellent", "acceptable", "poor"
+    vector_quality: str  # "excellent", "acceptable", "poor"
 
     # Path following metrics
-    path_deviation: float    # How well fit follows data trajectory
-    path_quality: str       # "excellent", "acceptable", "poor"
+    path_deviation: float  # How well fit follows data trajectory
+    path_quality: str  # "excellent", "acceptable", "poor"
 
     # Overall assessment
-    overall_quality: str    # "excellent", "acceptable", "poor"
+    overall_quality: str  # "excellent", "acceptable", "poor"
+
 
 class FitResult(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -44,6 +47,7 @@ class FitResult(BaseModel):
     Z_fit: Optional[np.ndarray] = None
     fit_quality: Optional[FitQualityMetrics] = None
 
+
 class DRTResult(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -58,6 +62,7 @@ class DRTResult(BaseModel):
     residuals_imag: Optional[np.ndarray] = None
     fit_quality: Optional[FitQualityMetrics] = None
 
+
 class LinKKResult(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -70,6 +75,7 @@ class LinKKResult(BaseModel):
     mean_residual: float
     fit_quality: Optional[FitQualityMetrics] = None
 
+
 class AnalysisResult(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -80,5 +86,5 @@ class AnalysisResult(BaseModel):
     recommendations: List[str] = Field(default_factory=list)
     overall_assessment: Dict[str, Any] = Field(
         default_factory=dict,
-        description="Overall analysis including cross-method fit quality comparison"
+        description="Overall analysis including cross-method fit quality comparison",
     )

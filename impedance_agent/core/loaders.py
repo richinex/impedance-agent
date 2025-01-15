@@ -6,6 +6,7 @@ import pandas as pd
 from .models import ImpedanceData
 from .exceptions import DataLoadError
 
+
 class ImpedanceLoader:
     """Handles loading impedance data from various file formats"""
 
@@ -18,13 +19,13 @@ class ImpedanceLoader:
             raise DataLoadError(f"File not found: {file_path}")
 
         try:
-            if file_path.suffix == '.txt':
+            if file_path.suffix == ".txt":
                 return ImpedanceLoader._load_txt(file_path)
-            elif file_path.suffix == '.csv':
+            elif file_path.suffix == ".csv":
                 return ImpedanceLoader._load_csv(file_path)
-            elif file_path.suffix == '.xlsx':
+            elif file_path.suffix == ".xlsx":
                 return ImpedanceLoader._load_excel(file_path)
-            elif file_path.suffix == '.json':
+            elif file_path.suffix == ".json":
                 return ImpedanceLoader._load_json(file_path)
             else:
                 raise DataLoadError(f"Unsupported file format: {file_path.suffix}")
@@ -41,12 +42,20 @@ class ImpedanceLoader:
 
             # If first line contains letters, it's likely a header - skip it
             if any(c.isalpha() for c in first_line):
-                data = pd.read_csv(file_path, sep=None, engine='python',
-                                names=['freq', 'zreal', 'zimag'],
-                                skiprows=1)
+                data = pd.read_csv(
+                    file_path,
+                    sep=None,
+                    engine="python",
+                    names=["freq", "zreal", "zimag"],
+                    skiprows=1,
+                )
             else:
-                data = pd.read_csv(file_path, sep=None, engine='python',
-                                names=['freq', 'zreal', 'zimag'])
+                data = pd.read_csv(
+                    file_path,
+                    sep=None,
+                    engine="python",
+                    names=["freq", "zreal", "zimag"],
+                )
 
             return ImpedanceLoader._process_dataframe(data)
         except Exception as e:
@@ -62,12 +71,20 @@ class ImpedanceLoader:
 
             # If first line contains letters, it's likely a header - skip it
             if any(c.isalpha() for c in first_line):
-                data = pd.read_csv(file_path, sep=None, engine='python',
-                                names=['freq', 'zreal', 'zimag'],
-                                skiprows=1)
+                data = pd.read_csv(
+                    file_path,
+                    sep=None,
+                    engine="python",
+                    names=["freq", "zreal", "zimag"],
+                    skiprows=1,
+                )
             else:
-                data = pd.read_csv(file_path, sep=None, engine='python',
-                                names=['freq', 'zreal', 'zimag'])
+                data = pd.read_csv(
+                    file_path,
+                    sep=None,
+                    engine="python",
+                    names=["freq", "zreal", "zimag"],
+                )
 
             return ImpedanceLoader._process_dataframe(data)
         except Exception as e:
@@ -81,13 +98,12 @@ class ImpedanceLoader:
             first_row = pd.read_excel(file_path, nrows=1)
 
             # If first row contains any text, treat it as header and skip
-            if first_row.iloc[0].astype(str).str.contains('[a-zA-Z]').any():
-                data = pd.read_excel(file_path,
-                                   names=['freq', 'zreal', 'zimag'],
-                                   skiprows=1)
+            if first_row.iloc[0].astype(str).str.contains("[a-zA-Z]").any():
+                data = pd.read_excel(
+                    file_path, names=["freq", "zreal", "zimag"], skiprows=1
+                )
             else:
-                data = pd.read_excel(file_path,
-                                   names=['freq', 'zreal', 'zimag'])
+                data = pd.read_excel(file_path, names=["freq", "zreal", "zimag"])
 
             return ImpedanceLoader._process_dataframe(data)
         except Exception as e:
@@ -102,7 +118,7 @@ class ImpedanceLoader:
 
             # Ensure we only take the first 3 columns
             data = data.iloc[:, :3]
-            data.columns = ['freq', 'zreal', 'zimag']
+            data.columns = ["freq", "zreal", "zimag"]
 
             return ImpedanceLoader._process_dataframe(data)
         except Exception as e:
@@ -123,12 +139,6 @@ class ImpedanceLoader:
                 real = real[idx]
                 imaginary = imaginary[idx]
 
-            return ImpedanceData(
-                frequency=frequency,
-                real=real,
-                imaginary=imaginary
-            )
+            return ImpedanceData(frequency=frequency, real=real, imaginary=imaginary)
         except Exception as e:
             raise DataLoadError(f"Failed to process data: {str(e)}")
-
-            

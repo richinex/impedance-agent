@@ -5,19 +5,21 @@ from dotenv import load_dotenv
 from dataclasses import dataclass
 from typing import Optional
 
+
 @dataclass
 class APIConfig:
     api_key: str
     base_url: str
     model: str
 
+
 class Environment:
     def __init__(self):
         # Try multiple locations for .env file
         possible_paths = [
-            Path.cwd() / '.env',  # Current working directory
-            Path(__file__).parent.parent / '.env',  # Package directory
-            Path(__file__).parent.parent.parent / '.env',  # Project root
+            Path.cwd() / ".env",  # Current working directory
+            Path(__file__).parent.parent / ".env",  # Package directory
+            Path(__file__).parent.parent.parent / ".env",  # Project root
         ]
 
         # Use the first .env file found
@@ -27,25 +29,31 @@ class Environment:
             load_dotenv(env_path)
         else:
             # Optional: print a warning or hint about .env.example
-            example_path = Path(__file__).parent.parent / '.env.example'
+            example_path = Path(__file__).parent.parent / ".env.example"
             if example_path.exists():
-                print(f"No .env file found. Please copy {example_path} to create your .env file.")
+                print(
+                    f"No .env file found. Please copy {example_path} to create your .env file."
+                )
 
         # API Configurations
         self.deepseek = APIConfig(
-            api_key=self._get_optional('DEEPSEEK_API_KEY', ''),
-            base_url=self._get_optional('DEEPSEEK_API_BASE_URL', 'https://api.deepseek.com'),
-            model='deepseek-chat'
+            api_key=self._get_optional("DEEPSEEK_API_KEY", ""),
+            base_url=self._get_optional(
+                "DEEPSEEK_API_BASE_URL", "https://api.deepseek.com"
+            ),
+            model="deepseek-chat",
         )
 
         self.openai = APIConfig(
-            api_key=self._get_optional('OPENAI_API_KEY', ''),
-            base_url=self._get_optional('OPENAI_API_BASE_URL', 'https://api.openai.com/v1'),
-            model='gpt-4o-mini'
+            api_key=self._get_optional("OPENAI_API_KEY", ""),
+            base_url=self._get_optional(
+                "OPENAI_API_BASE_URL", "https://api.openai.com/v1"
+            ),
+            model="gpt-4o-mini",
         )
 
         # Other configurations
-        self.log_level = self._get_optional('LOG_LEVEL', 'INFO')
+        self.log_level = self._get_optional("LOG_LEVEL", "INFO")
 
         # Validate configurations
         self._validate_configs()
@@ -113,9 +121,9 @@ class Environment:
         Raises:
             ValueError: If the provider is not supported
         """
-        if provider == 'deepseek':
+        if provider == "deepseek":
             return self.deepseek
-        elif provider == 'openai':
+        elif provider == "openai":
             return self.openai
         else:
             raise ValueError(f"Unsupported provider: {provider}")
@@ -144,11 +152,12 @@ class Environment:
             List of provider names that have valid credentials
         """
         providers = []
-        if self.is_provider_configured('deepseek'):
-            providers.append('deepseek')
-        if self.is_provider_configured('openai'):
-            providers.append('openai')
+        if self.is_provider_configured("deepseek"):
+            providers.append("deepseek")
+        if self.is_provider_configured("openai"):
+            providers.append("openai")
         return providers
+
 
 # Global environment instance
 env = Environment()

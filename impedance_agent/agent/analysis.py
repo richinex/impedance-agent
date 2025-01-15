@@ -5,31 +5,42 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, Dict, List, Any
 import asyncio
 import logging
-from ..core.models import ImpedanceData, AnalysisResult, DRTResult, LinKKResult, FitResult
+from ..core.models import (
+    ImpedanceData,
+    AnalysisResult,
+    DRTResult,
+    LinKKResult,
+    FitResult,
+)
 from .deepseek_agent import DeepSeekAgent
 from .openai_agent import OpenAIAgent
+
 
 class ImpedanceAnalysisAgent:
     """Agent for analyzing impedance data using LLM providers"""
 
-    def __init__(self, provider: str = 'deepseek'):
+    def __init__(self, provider: str = "deepseek"):
         """Initialize with specified provider"""
         self.logger = logging.getLogger(__name__)
         self.provider = provider
 
         # Initialize provider-specific agent
-        if provider == 'deepseek':
+        if provider == "deepseek":
             self.agent = DeepSeekAgent()
-        elif provider == 'openai':
+        elif provider == "openai":
             self.agent = OpenAIAgent()
         else:
             raise ValueError(f"Unsupported provider: {provider}")
 
         self.completed_tasks = set()
 
-    async def execute_tool_calls_concurrently(self, tool_calls, data: ImpedanceData) -> Dict[str, Any]:
+    async def execute_tool_calls_concurrently(
+        self, tool_calls, data: ImpedanceData
+    ) -> Dict[str, Any]:
         """Execute all tool calls concurrently"""
-        self.logger.info(f"Starting concurrent execution of {len(tool_calls)} tool calls")
+        self.logger.info(
+            f"Starting concurrent execution of {len(tool_calls)} tool calls"
+        )
         results = {}
 
         with ThreadPoolExecutor() as executor:
@@ -37,10 +48,14 @@ class ImpedanceAnalysisAgent:
             for tool_call in tool_calls:
                 if tool_call.function.name not in self.completed_tasks:
                     self.logger.info(f"Queueing task: {tool_call.function.name}")
-                    futures.append((
-                        tool_call,
-                        executor.submit(self.agent._handle_tool_call, tool_call, data)
-                    ))
+                    futures.append(
+                        (
+                            tool_call,
+                            executor.submit(
+                                self.agent._handle_tool_call, tool_call, data
+                            ),
+                        )
+                    )
                     self.completed_tasks.add(tool_call.function.name)
 
             for tool_call, future in futures:
@@ -53,7 +68,9 @@ class ImpedanceAnalysisAgent:
                     self.logger.error(error_msg)
                     results[tool_call.function.name] = f"Error: {error_msg}"
                 except Exception as e:
-                    self.logger.error(f"Task failed {tool_call.function.name}: {str(e)}")
+                    self.logger.error(
+                        f"Task failed {tool_call.function.name}: {str(e)}"
+                    )
                     results[tool_call.function.name] = f"Error: {str(e)}"
 
         return results
@@ -70,7 +87,9 @@ class ImpedanceAnalysisAgent:
             self.logger.error(f"Task failed {tool_call.function.name}: {str(e)}")
             raise
 
-    def analyze(self, data: ImpedanceData, model_config: Optional[Dict] = None) -> AnalysisResult:
+    def analyze(
+        self, data: ImpedanceData, model_config: Optional[Dict] = None
+    ) -> AnalysisResult:
         """Analyze impedance data"""
         self.logger.info("Starting analysis")
         analysis_result = AnalysisResult()
@@ -78,37 +97,47 @@ class ImpedanceAnalysisAgent:
         # Setup initial messages
         messages = [
             {"role": "system", "content": self.agent.system_prompt},
-            {"role": "user", "content": self.agent.get_user_prompt(data, model_config)}
+            {"role": "user", "content": self.agent.get_user_prompt(data, model_config)},
         ]
 
         try:
             if isinstance(self.agent, DeepSeekAgent):
                 # Parallel execution for DeepSeek
                 response = self.agent.create_chat_completion(
-                    messages=messages,
-                    tools=self.agent.tools,
-                    tool_choice="auto"
+                    messages=messages, tools=self.agent.tools, tool_choice="auto"
                 )
                 message = response.choices[0].message
-                messages.append({
-                    "role": "assistant",
-                    "content": message.content,
-                    "tool_calls": message.tool_calls if hasattr(message, "tool_calls") else None
-                })
+                messages.append(
+                    {
+                        "role": "assistant",
+                        "content": message.content,
+                        "tool_calls": (
+                            message.tool_calls
+                            if hasattr(message, "tool_calls")
+                            else None
+                        ),
+                    }
+                )
 
                 if hasattr(message, "tool_calls") and message.tool_calls:
                     # Execute all tools concurrently
-                    results = asyncio.run(self.execute_tool_calls_concurrently(message.tool_calls, data))
+                    results = asyncio.run(
+                        self.execute_tool_calls_concurrently(message.tool_calls, data)
+                    )
 
                     # Add results to conversation
                     for tool_call in message.tool_calls:
-                        result_content = str(results.get(tool_call.function.name, "Error: No result"))
-                        messages.append({
-                            "role": "tool",
-                            "tool_call_id": tool_call.id,
-                            "name": tool_call.function.name,
-                            "content": result_content
-                        })
+                        result_content = str(
+                            results.get(tool_call.function.name, "Error: No result")
+                        )
+                        messages.append(
+                            {
+                                "role": "tool",
+                                "tool_call_id": tool_call.id,
+                                "name": tool_call.function.name,
+                                "content": result_content,
+                            }
+                        )
 
                     # Store results
                     for tool_name, result in results.items():
@@ -116,7 +145,9 @@ class ImpedanceAnalysisAgent:
                             analysis_result.ecm_fit = result
                         elif tool_name == "fit_drt" and isinstance(result, DRTResult):
                             analysis_result.drt_fit = result
-                        elif tool_name == "fit_linkk" and isinstance(result, LinKKResult):
+                        elif tool_name == "fit_linkk" and isinstance(
+                            result, LinKKResult
+                        ):
                             analysis_result.linkk_fit = result
 
             else:
@@ -129,9 +160,7 @@ class ImpedanceAnalysisAgent:
                 while len(completed_tools) < len(required_tools):
                     # Get next tool call
                     response = self.agent.create_chat_completion(
-                        messages=messages,
-                        tools=self.agent.tools,
-                        tool_choice="auto"
+                        messages=messages, tools=self.agent.tools, tool_choice="auto"
                     )
                     message = response.choices[0].message
 
@@ -149,11 +178,13 @@ class ImpedanceAnalysisAgent:
                         continue
 
                     # Add tool call to conversation
-                    messages.append({
-                        "role": "assistant",
-                        "content": None,
-                        "tool_calls": [tool_call]
-                    })
+                    messages.append(
+                        {
+                            "role": "assistant",
+                            "content": None,
+                            "tool_calls": [tool_call],
+                        }
+                    )
 
                     # Execute tool
                     result = asyncio.run(self._execute_tool_call(tool_call, data))
@@ -167,21 +198,28 @@ class ImpedanceAnalysisAgent:
                         analysis_result.linkk_fit = result
 
                     # Add tool result to conversation
-                    messages.append({
-                        "role": "tool",
-                        "tool_call_id": tool_call.id,
-                        "name": tool_name,
-                        "content": str(result)
-                    })
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tool_call.id,
+                            "name": tool_name,
+                            "content": str(result),
+                        }
+                    )
 
                     completed_tools.add(tool_name)
 
             # Get final interpretation
             summary_response = self.agent.create_chat_completion(
-                messages=messages + [{"role": "user", "content":
-                    "Please provide your detailed interpretation of all results."}],
+                messages=messages
+                + [
+                    {
+                        "role": "user",
+                        "content": "Please provide your detailed interpretation of all results.",
+                    }
+                ],
                 tools=self.agent.tools,
-                tool_choice="none"
+                tool_choice="none",
             )
 
             if summary_response.choices[0].message.content:

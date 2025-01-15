@@ -7,18 +7,16 @@ from ..core.env import env
 from ..core.models import ImpedanceData
 import logging
 
+
 class DeepSeekAgent(BaseAgent):
     def __init__(self):
         """Initialize DeepSeek agent"""
         super().__init__()
-        config = env.get_provider_config('deepseek')
+        config = env.get_provider_config("deepseek")
         if not config:
             raise ValueError("DeepSeek provider not configured")
 
-        self.client = OpenAI(
-            api_key=config.api_key,
-            base_url=config.base_url
-        )
+        self.client = OpenAI(api_key=config.api_key, base_url=config.base_url)
         self.model = config.model
 
     @property
@@ -168,11 +166,12 @@ class DeepSeekAgent(BaseAgent):
     - Consider physical meaning of parameters and processes
     - END analysis report with: "NOTICE TO RESEARCHERS: LLMs hallucinate. All analyses and recommendations are intended as guidance to be evaluated alongside physical understanding and domain expertise."""
 
-
     def get_user_prompt(self, data: ImpedanceData, model_config: Optional[Dict]) -> str:
-        prompt = (f"Analyze impedance data from {min(data.frequency):.1e} to "
-                f"{max(data.frequency):.1e} Hz.\n\n"
-                f"REQUIRED: Call these tools simultaneously in your first response:\n")
+        prompt = (
+            f"Analyze impedance data from {min(data.frequency):.1e} to "
+            f"{max(data.frequency):.1e} Hz.\n\n"
+            f"REQUIRED: Call these tools simultaneously in your first response:\n"
+        )
 
         if model_config:
             prompt += "\n1. fit_linkk - for data validation"
@@ -180,9 +179,11 @@ class DeepSeekAgent(BaseAgent):
             prompt += "\n3. fit_ecm - using this model configuration:\n"
             prompt += f"```python\n{model_config['model_code']}\n```\n"
             prompt += "Variables:\n"
-            for var in model_config['variables']:
-                prompt += (f"- {var['name']}: initial={var['initialValue']}, "
-                        f"bounds=[{var['lowerBound']}, {var['upperBound']}]\n")
+            for var in model_config["variables"]:
+                prompt += (
+                    f"- {var['name']}: initial={var['initialValue']}, "
+                    f"bounds=[{var['lowerBound']}, {var['upperBound']}]\n"
+                )
         else:
             prompt += "\n1. fit_linkk - for data validation"
             prompt += "\n2. fit_drt - for time constant distribution"
@@ -190,7 +191,6 @@ class DeepSeekAgent(BaseAgent):
         prompt += "\n\nEnsure that residuals (both real and imaginary) are included in the analysis and evaluation of the fits."
 
         return prompt
-
 
     def _get_tools(self) -> List[Dict[str, Any]]:
         """DeepSeek tool format"""
@@ -204,10 +204,10 @@ class DeepSeekAgent(BaseAgent):
                         "type": "object",
                         "properties": {
                             "c": {"type": "number", "default": 0.85},
-                            "max_M": {"type": "integer", "default": 100}
-                        }
-                    }
-                }
+                            "max_M": {"type": "integer", "default": 100},
+                        },
+                    },
+                },
             },
             {
                 "type": "function",
@@ -226,19 +226,19 @@ class DeepSeekAgent(BaseAgent):
                                         "name": {"type": "string"},
                                         "initialValue": {"type": "number"},
                                         "lowerBound": {"type": "number"},
-                                        "upperBound": {"type": "number"}
-                                    }
-                                }
+                                        "upperBound": {"type": "number"},
+                                    },
+                                },
                             },
                             "weighting": {
                                 "type": "string",
                                 "enum": ["unit", "proportional", "modulus"],
-                                "default": "modulus"
-                            }
+                                "default": "modulus",
+                            },
                         },
-                        "required": ["model_code", "variables"]
-                    }
-                }
+                        "required": ["model_code", "variables"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -253,37 +253,38 @@ class DeepSeekAgent(BaseAgent):
                             "mode": {
                                 "type": "string",
                                 "enum": ["real", "imag"],
-                                "default": "real"
-                            }
-                        }
-                    }
-                }
-            }
+                                "default": "real",
+                            },
+                        },
+                    },
+                },
+            },
         ]
 
     def _format_message(self, message: Dict) -> Dict:
         """Format message for DeepSeek"""
         # For tool results
-        if message.get('role') in ['tool', 'function']:
+        if message.get("role") in ["tool", "function"]:
             return {
                 "role": "tool",
-                "tool_call_id": message.get('tool_call_id', f"call_{message['name']}"),
-                "name": message['name'],
-                "content": message['content']
+                "tool_call_id": message.get("tool_call_id", f"call_{message['name']}"),
+                "name": message["name"],
+                "content": message["content"],
             }
 
         # For assistant messages
-        if message.get('role') == 'assistant':
-            formatted = {"role": "assistant", "content": message.get('content', '')}
-            if message.get('tool_calls'):
-                formatted["tool_calls"] = message['tool_calls']
+        if message.get("role") == "assistant":
+            formatted = {"role": "assistant", "content": message.get("content", "")}
+            if message.get("tool_calls"):
+                formatted["tool_calls"] = message["tool_calls"]
             return formatted
 
         # For all other messages
         return message.copy()
 
-    def create_chat_completion(self, messages: List[Dict], tools: List[Dict] = None,
-                             tool_choice: str = "auto") -> Any:
+    def create_chat_completion(
+        self, messages: List[Dict], tools: List[Dict] = None, tool_choice: str = "auto"
+    ) -> Any:
         """Make API call to DeepSeek"""
         try:
             formatted_messages = []
@@ -291,10 +292,10 @@ class DeepSeekAgent(BaseAgent):
 
             # Track and validate message sequence
             for msg in messages:
-                if msg.get('role') == 'assistant' and msg.get('tool_calls'):
+                if msg.get("role") == "assistant" and msg.get("tool_calls"):
                     tool_calls_ids.update(
-                        call.id if hasattr(call, 'id') else f"call_{call['name']}"
-                        for call in msg['tool_calls']
+                        call.id if hasattr(call, "id") else f"call_{call['name']}"
+                        for call in msg["tool_calls"]
                     )
                 formatted_messages.append(self._format_message(msg))
 
@@ -302,7 +303,7 @@ class DeepSeekAgent(BaseAgent):
                 model=self.model,
                 messages=formatted_messages,
                 tools=tools if tools else self.tools,
-                tool_choice=tool_choice
+                tool_choice=tool_choice,
             )
             return response
         except Exception as e:

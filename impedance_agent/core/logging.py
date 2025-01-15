@@ -7,10 +7,8 @@ from typing import Optional
 from rich.logging import RichHandler
 import yaml
 
-def setup_logging(
-    level: str = "INFO",
-    config_path: Optional[Path] = None
-) -> None:
+
+def setup_logging(level: str = "INFO", config_path: Optional[Path] = None) -> None:
     """Configure logging with optional configuration file"""
 
     # Create basic logger first
@@ -18,7 +16,7 @@ def setup_logging(
     if not logger.handlers:  # Only add handler if none exists
         handler = RichHandler()
         formatter = logging.Formatter(
-            '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+            "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
         )
         handler.setFormatter(formatter)
         logger.addHandler(handler)
@@ -26,35 +24,29 @@ def setup_logging(
 
     # Default configuration
     config = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'standard': {
-                'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
+        },
+        "handlers": {
+            "console": {
+                "class": "rich.logging.RichHandler",
+                "formatter": "standard",
+                "level": level,
+            },
+            "file": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": "impedance_analysis.log",
+                "maxBytes": 10485760,  # 10MB
+                "backupCount": 5,
+                "formatter": "standard",
+                "level": level,
             },
         },
-        'handlers': {
-            'console': {
-                'class': 'rich.logging.RichHandler',
-                'formatter': 'standard',
-                'level': level,
-            },
-            'file': {
-                'class': 'logging.handlers.RotatingFileHandler',
-                'filename': 'impedance_analysis.log',
-                'maxBytes': 10485760,  # 10MB
-                'backupCount': 5,
-                'formatter': 'standard',
-                'level': level,
-            }
+        "loggers": {
+            "": {"handlers": ["console", "file"], "level": level, "propagate": True}
         },
-        'loggers': {
-            '': {
-                'handlers': ['console', 'file'],
-                'level': level,
-                'propagate': True
-            }
-        }
     }
 
     try:
@@ -66,4 +58,6 @@ def setup_logging(
         # Configure logging
         logging.config.dictConfig(config)
     except Exception as e:
-        logger.warning(f"Could not configure advanced logging: {str(e)}. Using basic logging instead.")
+        logger.warning(
+            f"Could not configure advanced logging: {str(e)}. Using basic logging instead."
+        )

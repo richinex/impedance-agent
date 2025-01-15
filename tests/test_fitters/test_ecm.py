@@ -5,6 +5,7 @@ import jax.numpy as jnp
 from impedance_agent.core.models import ImpedanceData, FitResult
 from impedance_agent.fitters.ecm import ECMFitter
 
+
 @pytest.fixture
 def randles_data():
     """Generate synthetic Randles circuit data"""
@@ -14,21 +15,21 @@ def randles_data():
     Cdl = 1e-3
     w = 2 * np.pi * freq
     Z = Rs + Rct / (1 + 1j * w * Cdl * Rct)
-    return ImpedanceData(
-        frequency=freq,
-        real=Z.real,
-        imaginary=Z.imag
-    )
+    return ImpedanceData(frequency=freq, real=Z.real, imaginary=Z.imag)
+
 
 @pytest.fixture
 def randles_model():
     """Define Randles circuit model function"""
+
     def model(p, f):
         w = 2 * jnp.pi * f
         Rs, Rct, Cdl = p
         Z = Rs + Rct / (1 + 1j * w * Cdl * Rct)
         return jnp.concatenate([Z.real, Z.imag])
+
     return model
+
 
 @pytest.fixture
 def ecm_fitter(randles_data, randles_model):
@@ -36,7 +37,7 @@ def ecm_fitter(randles_data, randles_model):
     param_info = [
         {"name": "Rs", "units": "Ω"},
         {"name": "Rct", "units": "Ω"},
-        {"name": "Cdl", "units": "F"}
+        {"name": "Cdl", "units": "F"},
     ]
 
     return ECMFitter(
@@ -47,8 +48,9 @@ def ecm_fitter(randles_data, randles_model):
         lb=np.array([0.0, 0.0, 0.0]),
         ub=np.array([10.0, 10.0, 1.0]),
         param_info=param_info,
-        weighting="modulus"
+        weighting="modulus",
     )
+
 
 def test_ecm_initialization(ecm_fitter):
     """Test ECM fitter initialization"""
@@ -56,6 +58,7 @@ def test_ecm_initialization(ecm_fitter):
     assert ecm_fitter.num_params == 3
     assert ecm_fitter.num_freq == 50
     assert ecm_fitter.dof == 97  # 2*50 - 3
+
 
 def test_ecm_fitting(ecm_fitter):
     """Test ECM fitting with Randles circuit"""
@@ -76,15 +79,17 @@ def test_ecm_fitting(ecm_fitter):
     assert result.fit_quality.vector_difference < 0.05
     assert result.fit_quality.path_deviation < 0.05
 
+
 def test_residuals_calculation(ecm_fitter):
     """Test calculation of normalized residuals"""
-    Z_fit = 1.0 + 2.0/(1 + 1j * 2 * np.pi * ecm_fitter.freq * 1e-3 * 2.0)
+    Z_fit = 1.0 + 2.0 / (1 + 1j * 2 * np.pi * ecm_fitter.freq * 1e-3 * 2.0)
     residuals_real, residuals_imag = ecm_fitter.compute_normalized_residuals(Z_fit)
 
     assert residuals_real.shape == (50,)
     assert residuals_imag.shape == (50,)
     assert np.all(np.abs(residuals_real) < 0.01)
     assert np.all(np.abs(residuals_imag) < 0.01)
+
 
 def test_invalid_weighting():
     """Test ECM fitter with invalid weighting"""
@@ -96,10 +101,10 @@ def test_invalid_weighting():
             impedance_data=ImpedanceData(
                 frequency=np.array([1.0]),
                 real=np.array([1.0]),
-                imaginary=np.array([0.0])
+                imaginary=np.array([0.0]),
             ),
             lb=np.array([0.0]),
             ub=np.array([10.0]),
             param_info=[{"name": "R"}],
-            weighting="invalid"
+            weighting="invalid",
         )

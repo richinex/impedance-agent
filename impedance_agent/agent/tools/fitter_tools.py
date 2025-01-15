@@ -6,11 +6,12 @@ from ...core.models import (
     ImpedanceData,
     FitResult,
     DRTResult,
-    LinKKResult  # Add this import
+    LinKKResult,  # Add this import
 )
 from ...fitters.ecm import ECMFitter
 from ...fitters.drt import DRTFitter
 from ...fitters.linkk import LinKKFitter  # Add this import too
+
 
 class FitterTools:
     """Tools for ECM and DRT fitting with error handling"""
@@ -19,17 +20,19 @@ class FitterTools:
         """Run ECM fitting"""
         try:
             print("ECM fitting arguments:", kwargs)
-            model_code = kwargs.get('model_code')
-            variables = kwargs.get('variables', [])
-            weighting = kwargs.get('weighting', 'modulus')
+            model_code = kwargs.get("model_code")
+            variables = kwargs.get("variables", [])
+            weighting = kwargs.get("weighting", "modulus")
 
             if not model_code or not variables:
-                raise ValueError("Missing required parameters: model_code and variables")
+                raise ValueError(
+                    "Missing required parameters: model_code and variables"
+                )
 
             # Extract parameters and convert to numpy arrays
-            p0 = np.array([var['initialValue'] for var in variables])
-            lb = np.array([var['lowerBound'] for var in variables])
-            ub = np.array([var['upperBound'] for var in variables])
+            p0 = np.array([var["initialValue"] for var in variables])
+            lb = np.array([var["lowerBound"] for var in variables])
+            ub = np.array([var["upperBound"] for var in variables])
 
             # Create namespace with required imports
             namespace = {
@@ -50,7 +53,7 @@ class FitterTools:
                 lb=lb,
                 ub=ub,
                 param_info=variables,
-                weighting=weighting
+                weighting=weighting,
             )
 
             result = fitter.fit()
@@ -62,14 +65,15 @@ class FitterTools:
         except Exception as e:
             print(f"ECM fitting failed: {str(e)}")
             import traceback
+
             traceback.print_exc()
             return None
 
     def run_drt_fit(self, data: ImpedanceData, **kwargs) -> Optional[DRTResult]:
         try:
-            lambda_t = kwargs.get('lambda_t', 1e-14)
-            lambda_pg = kwargs.get('lambda_pg', 0.01)
-            mode = kwargs.get('mode', 'real')
+            lambda_t = kwargs.get("lambda_t", 1e-14)
+            lambda_pg = kwargs.get("lambda_pg", 0.01)
+            mode = kwargs.get("mode", "real")
 
             # Get data in original order (it's already in descending frequency)
             freqs = np.array(data.frequency)  # Already in descending order
@@ -97,7 +101,7 @@ class FitterTools:
                 lam_pg0=lambda_pg,
                 lower_bounds=jnp.array([1e-15, 1e-15]),
                 upper_bounds=jnp.array([1e15, 1e15]),
-                mode=mode
+                mode=mode,
             )
 
             return fitter.fit()
@@ -110,8 +114,8 @@ class FitterTools:
     def run_linkk_fit(self, data: ImpedanceData, **kwargs) -> Optional[LinKKResult]:
         """Run Lin-KK validation"""
         try:
-            c = kwargs.get('c', 0.85)
-            max_M = kwargs.get('max_M', 100)
+            c = kwargs.get("c", 0.85)
+            max_M = kwargs.get("max_M", 100)
 
             fitter = LinKKFitter(data)
             return fitter.fit(c=c, max_M=max_M)
@@ -119,5 +123,6 @@ class FitterTools:
         except Exception as e:
             print(f"Lin-KK validation failed: {str(e)}")
             import traceback
+
             traceback.print_exc()
             return None

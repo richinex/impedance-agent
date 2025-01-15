@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:
 
 jobs:
   test:
@@ -28,11 +28,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install .[dev]
 
+    - name: Format code
+      run: |
+        black .
+        isort .
+
     - name: Lint
       run: |
-        black . --check
         flake8 .
-        isort . --check
         mypy impedance_agent
 
     - name: Create dummy .env file

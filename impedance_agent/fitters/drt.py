@@ -10,8 +10,19 @@ from scipy.optimize import least_squares
 from typing import Optional, Dict, Tuple
 from ..core.models import ImpedanceData, DRTResult
 
+
 class DRTFitter:
-    def __init__(self, zexp_re, zexp_im, omg, lam_t0, lam_pg0, lower_bounds, upper_bounds, mode="real"):
+    def __init__(
+        self,
+        zexp_re,
+        zexp_im,
+        omg,
+        lam_t0,
+        lam_pg0,
+        lower_bounds,
+        upper_bounds,
+        mode="real",
+    ):
         self.logger = logging.getLogger(__name__)
 
         jax.config.update("jax_enable_x64", True)
@@ -52,8 +63,9 @@ class DRTFitter:
 
         # Build matrices and get initial guess
         self._create_tikhonov_matrix()
-        self.gfun_init = self.tikh_solver(self.lam_t0, self.a_mat_t_a, self.b_rhs, self.id_matrix)
-
+        self.gfun_init = self.tikh_solver(
+            self.lam_t0, self.a_mat_t_a, self.b_rhs, self.id_matrix
+        )
 
     def _create_dmesh(self, grid):
         """Creates a mesh spacing array for the given grid."""
@@ -131,7 +143,9 @@ class DRTFitter:
         """Converts internal parameters to external parameters."""
         return (lb + 10**p) / (1 + 10**p / ub)
 
-    def jacobian_lsq(self, pvec, lhs_matrix, a_mat_t_a, b_rhs, d_ln_tau, id_matrix, lb, ub):
+    def jacobian_lsq(
+        self, pvec, lhs_matrix, a_mat_t_a, b_rhs, d_ln_tau, id_matrix, lb, ub
+    ):
         """Compute the Jacobian of the Tikhonov residual function."""
         return jax.jacobian(self.tikh_residual)(
             jnp.array(pvec), lhs_matrix, a_mat_t_a, b_rhs, d_ln_tau, id_matrix, lb, ub
@@ -153,16 +167,14 @@ class DRTFitter:
         )
 
         self.logger.debug("Running projected gradient optimization")
-        solution = pg.run(
-            init_params=g_init,
-            lhs_matrix=lhs_matrix_new,
-            b_rhs=b_rhs
-        )
+        solution = pg.run(init_params=g_init, lhs_matrix=lhs_matrix_new, b_rhs=b_rhs)
 
         r_poly = jnp.sum(solution.params * d_ln_tau)
         return solution.params, r_poly, solution.state.iter_num
 
-    def tikh_residual(self, lamvec_log, lhs_matrix, a_mat_t_a, b_rhs, d_ln_tau, id_matrix, lb, ub):
+    def tikh_residual(
+        self, lamvec_log, lhs_matrix, a_mat_t_a, b_rhs, d_ln_tau, id_matrix, lb, ub
+    ):
         lamvec_norm = self.decode(lamvec_log, lb, ub)
         g_vector, rpoly, iterations = self.pg_solver(
             lamvec_norm, lhs_matrix, a_mat_t_a, b_rhs, d_ln_tau, id_matrix
@@ -182,7 +194,9 @@ class DRTFitter:
             low_bound = int(widths[2][n])
             up_bound = int(widths[3][n])
             integrals = integrals.at[n].set(
-                jnp.sum(g_vector[low_bound:up_bound] * self.d_ln_tau[low_bound:up_bound])
+                jnp.sum(
+                    g_vector[low_bound:up_bound] * self.d_ln_tau[low_bound:up_bound]
+                )
             )
 
         peak_params = jnp.zeros((2, peaks.size), dtype=jnp.float64)
@@ -193,6 +207,8 @@ class DRTFitter:
         return peak_params
 
     # src/fitters/drt.py
+
+
 import logging
 import jax
 import jax.numpy as jnp
@@ -204,8 +220,19 @@ from scipy.optimize import least_squares
 from typing import Optional, Dict, Tuple
 from ..core.models import ImpedanceData, DRTResult
 
+
 class DRTFitter:
-    def __init__(self, zexp_re, zexp_im, omg, lam_t0, lam_pg0, lower_bounds, upper_bounds, mode="real"):
+    def __init__(
+        self,
+        zexp_re,
+        zexp_im,
+        omg,
+        lam_t0,
+        lam_pg0,
+        lower_bounds,
+        upper_bounds,
+        mode="real",
+    ):
         self.logger = logging.getLogger(__name__)
 
         jax.config.update("jax_enable_x64", True)
@@ -246,9 +273,13 @@ class DRTFitter:
 
         # Build matrices and get initial guess
         self._create_tikhonov_matrix()
-        self.gfun_init = self.tikh_solver(self.lam_t0, self.a_mat_t_a, self.b_rhs, self.id_matrix)
+        self.gfun_init = self.tikh_solver(
+            self.lam_t0, self.a_mat_t_a, self.b_rhs, self.id_matrix
+        )
 
-    def compute_normalized_residuals(self, Z_fit: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def compute_normalized_residuals(
+        self, Z_fit: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Compute normalized residuals using impedance modulus for normalization."""
         # Calculate impedance modulus for normalization
         Z_mod = np.sqrt(self.zexp_re**2 + self.zexp_im**2)
@@ -335,7 +366,9 @@ class DRTFitter:
         """Converts internal parameters to external parameters."""
         return (lb + 10**p) / (1 + 10**p / ub)
 
-    def jacobian_lsq(self, pvec, lhs_matrix, a_mat_t_a, b_rhs, d_ln_tau, id_matrix, lb, ub):
+    def jacobian_lsq(
+        self, pvec, lhs_matrix, a_mat_t_a, b_rhs, d_ln_tau, id_matrix, lb, ub
+    ):
         """Compute the Jacobian of the Tikhonov residual function."""
         return jax.jacobian(self.tikh_residual)(
             jnp.array(pvec), lhs_matrix, a_mat_t_a, b_rhs, d_ln_tau, id_matrix, lb, ub
@@ -357,16 +390,14 @@ class DRTFitter:
         )
 
         self.logger.debug("Running projected gradient optimization")
-        solution = pg.run(
-            init_params=g_init,
-            lhs_matrix=lhs_matrix_new,
-            b_rhs=b_rhs
-        )
+        solution = pg.run(init_params=g_init, lhs_matrix=lhs_matrix_new, b_rhs=b_rhs)
 
         r_poly = jnp.sum(solution.params * d_ln_tau)
         return solution.params, r_poly, solution.state.iter_num
 
-    def tikh_residual(self, lamvec_log, lhs_matrix, a_mat_t_a, b_rhs, d_ln_tau, id_matrix, lb, ub):
+    def tikh_residual(
+        self, lamvec_log, lhs_matrix, a_mat_t_a, b_rhs, d_ln_tau, id_matrix, lb, ub
+    ):
         lamvec_norm = self.decode(lamvec_log, lb, ub)
         g_vector, rpoly, iterations = self.pg_solver(
             lamvec_norm, lhs_matrix, a_mat_t_a, b_rhs, d_ln_tau, id_matrix
@@ -386,7 +417,9 @@ class DRTFitter:
             low_bound = int(widths[2][n])
             up_bound = int(widths[3][n])
             integrals = integrals.at[n].set(
-                jnp.sum(g_vector[low_bound:up_bound] * self.d_ln_tau[low_bound:up_bound])
+                jnp.sum(
+                    g_vector[low_bound:up_bound] * self.d_ln_tau[low_bound:up_bound]
+                )
             )
 
         peak_params = jnp.zeros((2, peaks.size), dtype=jnp.float64)
@@ -428,13 +461,15 @@ class DRTFitter:
 
             # Prepare for least squares
             lamvec_init = jnp.array([self.lam_t0, self.lam_pg0], dtype=jnp.float64)
-            lamvec_init_log = self.encode(lamvec_init, self.lower_bounds, self.upper_bounds)
+            lamvec_init_log = self.encode(
+                lamvec_init, self.lower_bounds, self.upper_bounds
+            )
 
             # Perform optimization
             res_parm = least_squares(
                 jax.jit(self.tikh_residual),
                 lamvec_init_log,
-                method='lm',
+                method="lm",
                 jac=self.jacobian_lsq,
                 args=(
                     self.a_tikh,
@@ -448,7 +483,9 @@ class DRTFitter:
             )
 
             final_lamvec = self.decode(res_parm.x, self.lower_bounds, self.upper_bounds)
-            self.logger.info(f"Final parameters: λT={final_lamvec[0]:.2e}, λPG={final_lamvec[1]:.2e}")
+            self.logger.info(
+                f"Final parameters: λT={final_lamvec[0]:.2e}, λPG={final_lamvec[1]:.2e}"
+            )
 
             # Get final DRT distribution
             gfun_final, rpoly, n_iters = self.pg_solver(
@@ -471,13 +508,19 @@ class DRTFitter:
                 gfun_final, final_lamvec[0], self.a_mat_t_a, self.b_rhs, self.id_matrix
             )
 
-            self.logger.info(f"Residuals: initial = {res_init:.6e}, final = {res_fin:.6e}")
+            self.logger.info(
+                f"Residuals: initial = {res_init:.6e}, final = {res_fin:.6e}"
+            )
 
             if res_parm.status > 0:
-                self.logger.info(f"Optimization successful: {res_parm.njev} Jacobian evaluations")
+                self.logger.info(
+                    f"Optimization successful: {res_parm.njev} Jacobian evaluations"
+                )
 
             if self.flagiter == 1:
-                self.logger.warning("Maximum iteration limit reached in projected gradient")
+                self.logger.warning(
+                    "Maximum iteration limit reached in projected gradient"
+                )
 
             # Find peaks
             peak_params = self.rpol_peaks(gfun_final)
@@ -516,7 +559,7 @@ class DRTFitter:
                 residual=float(rpoly),
                 Z_fit=Z_fit,
                 residuals_real=residuals_real,
-                residuals_imag=residuals_imag
+                residuals_imag=residuals_imag,
             )
 
             self.logger.debug(f"Created DRTResult object with {len(peak_freqs)} peaks")
@@ -545,13 +588,15 @@ class DRTFitter:
 
             # Prepare for least squares
             lamvec_init = jnp.array([self.lam_t0, self.lam_pg0], dtype=jnp.float64)
-            lamvec_init_log = self.encode(lamvec_init, self.lower_bounds, self.upper_bounds)
+            lamvec_init_log = self.encode(
+                lamvec_init, self.lower_bounds, self.upper_bounds
+            )
 
             # Perform optimization
             res_parm = least_squares(
                 jax.jit(self.tikh_residual),
                 lamvec_init_log,
-                method='lm',
+                method="lm",
                 jac=self.jacobian_lsq,
                 args=(
                     self.a_tikh,
@@ -565,7 +610,9 @@ class DRTFitter:
             )
 
             final_lamvec = self.decode(res_parm.x, self.lower_bounds, self.upper_bounds)
-            self.logger.info(f"Final parameters: λT={final_lamvec[0]:.2e}, λPG={final_lamvec[1]:.2e}")
+            self.logger.info(
+                f"Final parameters: λT={final_lamvec[0]:.2e}, λPG={final_lamvec[1]:.2e}"
+            )
 
             # Get final DRT distribution
             gfun_final, rpoly, n_iters = self.pg_solver(
@@ -588,13 +635,19 @@ class DRTFitter:
                 gfun_final, final_lamvec[0], self.a_mat_t_a, self.b_rhs, self.id_matrix
             )
 
-            self.logger.info(f"Residuals: initial = {res_init:.6e}, final = {res_fin:.6e}")
+            self.logger.info(
+                f"Residuals: initial = {res_init:.6e}, final = {res_fin:.6e}"
+            )
 
             if res_parm.status > 0:
-                self.logger.info(f"Optimization successful: {res_parm.njev} Jacobian evaluations")
+                self.logger.info(
+                    f"Optimization successful: {res_parm.njev} Jacobian evaluations"
+                )
 
             if self.flagiter == 1:
-                self.logger.warning("Maximum iteration limit reached in projected gradient")
+                self.logger.warning(
+                    "Maximum iteration limit reached in projected gradient"
+                )
 
             # Find peaks
             peak_params = self.rpol_peaks(gfun_final)
@@ -633,7 +686,7 @@ class DRTFitter:
                 residual=float(rpoly),
                 Z_fit=Z_fit,
                 residuals_real=residuals_real,
-                residuals_imag=residuals_imag
+                residuals_imag=residuals_imag,
             )
 
             self.logger.debug(f"Created DRTResult object with {len(peak_freqs)} peaks")

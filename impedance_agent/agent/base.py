@@ -7,6 +7,7 @@ from ..core.models import ImpedanceData
 from ..agent.tools.fitter_tools import FitterTools
 import logging
 
+
 class BaseAgent(ABC):
     """Abstract base class for provider-specific agents"""
 
@@ -60,10 +61,9 @@ class BaseAgent(ABC):
         pass
 
     @abstractmethod
-    def create_chat_completion(self,
-                             messages: List[Dict],
-                             tools: List[Dict] = None,
-                             tool_choice: str = "auto") -> Any:
+    def create_chat_completion(
+        self, messages: List[Dict], tools: List[Dict] = None, tool_choice: str = "auto"
+    ) -> Any:
         """
         Make API call to provider
 

@@ -7,6 +7,7 @@ from impedance_agent.core.loaders import ImpedanceLoader
 from impedance_agent.core.exceptions import DataLoadError
 from impedance_agent.core.models import ImpedanceData
 
+
 @pytest.fixture
 def sample_data_variations():
     """Generate sample data in different formats"""
@@ -21,6 +22,7 @@ def sample_data_variations():
         "freq zreal zimag\n1000 1.0 -0.5\n100 1.5 -1.0\n10 2.0 -1.5",
     ]
 
+
 @pytest.fixture
 def sample_txt_files(tmp_path, sample_data_variations):
     """Create sample txt data files"""
@@ -31,29 +33,28 @@ def sample_txt_files(tmp_path, sample_data_variations):
         files.append(file_path)
     return files
 
+
 @pytest.fixture
 def sample_csv_file(tmp_path):
     """Create sample CSV data file"""
     file_path = tmp_path / "test_data.csv"
-    data = pd.DataFrame({
-        'freq': [1000, 100, 10],
-        'zreal': [1.0, 1.5, 2.0],
-        'zimag': [-0.5, -1.0, -1.5]
-    })
+    data = pd.DataFrame(
+        {"freq": [1000, 100, 10], "zreal": [1.0, 1.5, 2.0], "zimag": [-0.5, -1.0, -1.5]}
+    )
     data.to_csv(file_path, index=False)
     return file_path
+
 
 @pytest.fixture
 def sample_excel_file(tmp_path):
     """Create sample Excel data file"""
     file_path = tmp_path / "test_data.xlsx"
-    data = pd.DataFrame({
-        'freq': [1000, 100, 10],
-        'zreal': [1.0, 1.5, 2.0],
-        'zimag': [-0.5, -1.0, -1.5]
-    })
+    data = pd.DataFrame(
+        {"freq": [1000, 100, 10], "zreal": [1.0, 1.5, 2.0], "zimag": [-0.5, -1.0, -1.5]}
+    )
     data.to_excel(file_path, index=False)
     return file_path
+
 
 def test_load_txt_files(sample_txt_files):
     """Test loading from txt files with different formats"""
@@ -67,6 +68,7 @@ def test_load_txt_files(sample_txt_files):
         assert np.allclose(data.imaginary, [-0.5, -1.0, -1.5])
         assert np.all(np.diff(data.frequency) < 0)  # Check descending order
 
+
 def test_load_csv_file(sample_csv_file):
     """Test loading from CSV file"""
     data = ImpedanceLoader.load(sample_csv_file)
@@ -76,6 +78,7 @@ def test_load_csv_file(sample_csv_file):
     assert np.allclose(data.frequency, [1000, 100, 10])
     assert np.allclose(data.real, [1.0, 1.5, 2.0])
     assert np.allclose(data.imaginary, [-0.5, -1.0, -1.5])
+
 
 def test_load_excel_file(sample_excel_file):
     """Test loading from Excel file"""
@@ -87,10 +90,12 @@ def test_load_excel_file(sample_excel_file):
     assert np.allclose(data.real, [1.0, 1.5, 2.0])
     assert np.allclose(data.imaginary, [-0.5, -1.0, -1.5])
 
+
 def test_invalid_file():
     """Test loading nonexistent file"""
     with pytest.raises(DataLoadError, match="File not found"):
         ImpedanceLoader.load("nonexistent.txt")
+
 
 def test_unsupported_format(tmp_path):
     """Test loading unsupported file format"""
@@ -100,6 +105,7 @@ def test_unsupported_format(tmp_path):
     with pytest.raises(DataLoadError, match="Unsupported file format"):
         ImpedanceLoader.load(invalid_file)
 
+
 def test_invalid_data(tmp_path):
     """Test loading file with invalid data"""
     file_path = tmp_path / "invalid_data.txt"
@@ -108,14 +114,17 @@ def test_invalid_data(tmp_path):
     with pytest.raises(DataLoadError):
         ImpedanceLoader.load(file_path)
 
+
 def test_frequency_ordering(tmp_path):
     """Test automatic frequency reordering"""
     file_path = tmp_path / "unordered.csv"
-    data = pd.DataFrame({
-        'freq': [10, 1000, 100],  # Unordered frequencies
-        'zreal': [2.0, 1.0, 1.5],
-        'zimag': [-1.5, -0.5, -1.0]
-    })
+    data = pd.DataFrame(
+        {
+            "freq": [10, 1000, 100],  # Unordered frequencies
+            "zreal": [2.0, 1.0, 1.5],
+            "zimag": [-1.5, -0.5, -1.0],
+        }
+    )
     data.to_csv(file_path, index=False)
 
     result = ImpedanceLoader.load(file_path)

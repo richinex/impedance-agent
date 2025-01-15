@@ -5,20 +5,18 @@ import jax.numpy as jnp
 from impedance_agent.core.models import ImpedanceData, DRTResult
 from impedance_agent.fitters.drt import DRTFitter
 
+
 @pytest.fixture
 def single_tau_data():
     """Generate synthetic data with single time constant"""
     freq = np.logspace(-2, 5, 50)
     tau = 1e-3  # 1ms time constant
-    R = 100.0   # Large resistance for better signal
+    R = 100.0  # Large resistance for better signal
     w = 2 * np.pi * freq
     Z = R / (1 + 1j * w * tau)
 
-    return ImpedanceData(
-        frequency=freq,
-        real=Z.real,
-        imaginary=Z.imag
-    )
+    return ImpedanceData(frequency=freq, real=Z.real, imaginary=Z.imag)
+
 
 @pytest.fixture
 def drt_fitter(single_tau_data):
@@ -32,8 +30,9 @@ def drt_fitter(single_tau_data):
         lam_pg0=1e-5,
         lower_bounds=np.array([1e-10, 1e-10]),
         upper_bounds=np.array([1e3, 1e3]),
-        mode="real"
+        mode="real",
     )
+
 
 def test_drt_initialization(drt_fitter):
     """Test DRT fitter initialization"""
@@ -42,9 +41,10 @@ def test_drt_initialization(drt_fitter):
     assert drt_fitter.lam_t0 == 1e-6
     assert drt_fitter.lam_pg0 == 1e-5
     assert drt_fitter.niter == 80
-    assert hasattr(drt_fitter, 'tau')
-    assert hasattr(drt_fitter, 'ln_tau')
-    assert hasattr(drt_fitter, 'd_ln_tau')
+    assert hasattr(drt_fitter, "tau")
+    assert hasattr(drt_fitter, "ln_tau")
+    assert hasattr(drt_fitter, "d_ln_tau")
+
 
 def test_drt_mesh_creation(drt_fitter):
     """Test mesh creation"""
@@ -54,6 +54,7 @@ def test_drt_mesh_creation(drt_fitter):
     assert np.isfinite(drt_fitter.d_ln_tau[0])
     assert np.isfinite(drt_fitter.d_ln_tau[-1])
 
+
 def test_drt_matrix_creation(drt_fitter):
     """Test creation of DRT system matrices"""
     assert drt_fitter.a_matrix.shape == (50, 50)
@@ -62,6 +63,7 @@ def test_drt_matrix_creation(drt_fitter):
     assert drt_fitter.b_rhs.shape == (50,)
     # Test symmetry of A^T A
     assert np.allclose(drt_fitter.a_mat_t_a, drt_fitter.a_mat_t_a.T)
+
 
 def test_drt_fitting(drt_fitter):
     """Test DRT fitting with single time constant"""
@@ -83,6 +85,7 @@ def test_drt_fitting(drt_fitter):
     assert np.all(np.isfinite(result.residuals_real))
     assert np.all(np.isfinite(result.residuals_imag))
 
+
 def test_find_lambda(drt_fitter):
     """Test lambda parameter search"""
     resid, solnorm, lam_t_arr, lam_pg_arr = drt_fitter.find_lambda()
@@ -93,6 +96,7 @@ def test_find_lambda(drt_fitter):
     assert lam_pg_arr.shape == (25,)
     assert np.all(np.isfinite(resid))
     assert np.all(np.isfinite(solnorm))
+
 
 def test_compute_normalized_residuals(drt_fitter):
     """Test calculation of normalized residuals"""
@@ -105,6 +109,7 @@ def test_compute_normalized_residuals(drt_fitter):
     assert residuals_imag.shape == (50,)
     assert np.all(np.isfinite(residuals_real))
     assert np.all(np.isfinite(residuals_imag))
+
 
 def test_z_model_imre(drt_fitter):
     """Test impedance model calculation"""

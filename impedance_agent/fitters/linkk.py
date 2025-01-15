@@ -5,6 +5,7 @@ from typing import Optional, Tuple
 from impedance.validation import linKK
 from ..core.models import ImpedanceData, LinKKResult
 
+
 class LinKKFitter:
     def __init__(self, data: ImpedanceData):
         self.freq = data.frequency
@@ -28,12 +29,12 @@ class LinKKFitter:
                 Z=self.Z,
                 c=c,
                 max_M=max_M,
-                fit_type='complex',
-                add_cap=True
+                fit_type="complex",
+                add_cap=True,
             )
 
             # Calculate residuals and quality metrics
-            residuals = np.abs((self.Z - Z_fit)/self.Z)
+            residuals = np.abs((self.Z - Z_fit) / self.Z)
             max_residual = np.max(residuals)
             mean_residual = np.mean(residuals)
 
@@ -50,7 +51,7 @@ class LinKKFitter:
                 residuals_real=res_real,
                 residuals_imag=res_imag,
                 max_residual=float(max_residual),
-                mean_residual=float(mean_residual)
+                mean_residual=float(mean_residual),
             )
 
             self.logger.debug(f"Created LinKKResult object: {result}")

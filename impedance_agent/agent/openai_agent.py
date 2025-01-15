@@ -7,18 +7,16 @@ from ..core.models import ImpedanceData
 import logging
 import json
 
+
 class OpenAIAgent(BaseAgent):
     def __init__(self):
         """Initialize OpenAI agent"""
         super().__init__()
-        config = env.get_provider_config('openai')
+        config = env.get_provider_config("openai")
         if not config:
             raise ValueError("OpenAI provider not configured")
 
-        self.client = OpenAI(
-            api_key=config.api_key,
-            base_url=config.base_url
-        )
+        self.client = OpenAI(api_key=config.api_key, base_url=config.base_url)
         self.model = config.model
         self.logger = logging.getLogger(__name__)
 
@@ -169,10 +167,11 @@ class OpenAIAgent(BaseAgent):
     - Consider physical meaning of parameters and processes
     - END analysis report with: "NOTICE TO RESEARCHERS: LLMs hallucinate. All analyses and recommendations are intended as guidance to be evaluated alongside physical understanding and domain expertise."""
 
-
     def get_user_prompt(self, data: ImpedanceData, model_config: Optional[Dict]) -> str:
-        prompt = (f"Analyze impedance data from {min(data.frequency):.1e} to {max(data.frequency):.1e} Hz.\n\n"
-                f"Required analyses in order:\n\n")
+        prompt = (
+            f"Analyze impedance data from {min(data.frequency):.1e} to {max(data.frequency):.1e} Hz.\n\n"
+            f"Required analyses in order:\n\n"
+        )
 
         if model_config:
             prompt += "1. fit_linkk (data validation)\n"
@@ -180,9 +179,11 @@ class OpenAIAgent(BaseAgent):
             prompt += "3. fit_ecm with this model:\n"
             prompt += f"```python\n{model_config['model_code']}\n```\n"
             prompt += "\nModel parameters:\n"
-            for var in model_config['variables']:
-                prompt += (f"- {var['name']}: initial={var['initialValue']}, "
-                        f"bounds=[{var['lowerBound']}, {var['upperBound']}]\n")
+            for var in model_config["variables"]:
+                prompt += (
+                    f"- {var['name']}: initial={var['initialValue']}, "
+                    f"bounds=[{var['lowerBound']}, {var['upperBound']}]\n"
+                )
             prompt += "\nAfter fitting:\n"
             prompt += "- Compare number of DRT peaks vs ECM elements\n"
             prompt += "- Check if model accounts for all identified processes\n"
@@ -201,7 +202,6 @@ class OpenAIAgent(BaseAgent):
 
         return prompt
 
-
     def _get_tools(self) -> List[Dict[str, Any]]:
         """OpenAI tool format with schema validation"""
         return [
@@ -219,10 +219,10 @@ class OpenAIAgent(BaseAgent):
                         "type": "object",
                         "properties": {
                             "c": {"type": "number", "default": 0.85},
-                            "max_M": {"type": "integer", "default": 100}
-                        }
-                    }
-                }
+                            "max_M": {"type": "integer", "default": 100},
+                        },
+                    },
+                },
             },
             {
                 "type": "function",
@@ -242,11 +242,11 @@ class OpenAIAgent(BaseAgent):
                             "mode": {
                                 "type": "string",
                                 "enum": ["real", "imag"],
-                                "default": "real"
-                            }
-                        }
-                    }
-                }
+                                "default": "real",
+                            },
+                        },
+                    },
+                },
             },
             {
                 "type": "function",
@@ -262,7 +262,7 @@ class OpenAIAgent(BaseAgent):
                         "properties": {
                             "model_code": {
                                 "type": "string",
-                                "description": "Complete Python function definition for the impedance model"
+                                "description": "Complete Python function definition for the impedance model",
                             },
                             "variables": {
                                 "type": "array",
@@ -271,54 +271,59 @@ class OpenAIAgent(BaseAgent):
                                     "properties": {
                                         "name": {
                                             "type": "string",
-                                            "description": "Parameter name"
+                                            "description": "Parameter name",
                                         },
                                         "initialValue": {
                                             "type": "number",
-                                            "description": "Initial guess for the parameter"
+                                            "description": "Initial guess for the parameter",
                                         },
                                         "lowerBound": {
                                             "type": "number",
-                                            "description": "Lower bound for the parameter"
+                                            "description": "Lower bound for the parameter",
                                         },
                                         "upperBound": {
                                             "type": "number",
-                                            "description": "Upper bound for the parameter"
-                                        }
+                                            "description": "Upper bound for the parameter",
+                                        },
                                     },
-                                    "required": ["name", "initialValue", "lowerBound", "upperBound"]
-                                }
+                                    "required": [
+                                        "name",
+                                        "initialValue",
+                                        "lowerBound",
+                                        "upperBound",
+                                    ],
+                                },
                             },
                             "weighting": {
                                 "type": "string",
                                 "enum": ["unit", "proportional", "modulus"],
                                 "default": "modulus",
-                                "description": "Weighting scheme for the fit"
-                            }
+                                "description": "Weighting scheme for the fit",
+                            },
                         },
                         "required": ["model_code", "variables"],
-                        "additionalProperties": False
-                    }
-                }
-            }
+                        "additionalProperties": False,
+                    },
+                },
+            },
         ]
 
     def _format_message(self, message: Dict) -> Dict:
         """Format message for OpenAI API specifications"""
         try:
             # For assistant messages with tool calls
-            if message.get('role') == 'assistant':
-                formatted = {"role": "assistant", "content": message.get('content', '')}
-                if message.get('tool_calls'):
+            if message.get("role") == "assistant":
+                formatted = {"role": "assistant", "content": message.get("content", "")}
+                if message.get("tool_calls"):
                     tool_calls = []
-                    for call in message['tool_calls']:
+                    for call in message["tool_calls"]:
                         # Extract function name and arguments carefully
-                        if hasattr(call, 'function'):
+                        if hasattr(call, "function"):
                             func_name = call.function.name
                             arguments = call.function.arguments
                         else:
-                            func_name = call['function']['name']
-                            arguments = call['function'].get('arguments', {})
+                            func_name = call["function"]["name"]
+                            arguments = call["function"].get("arguments", {})
 
                         # Handle arguments properly
                         if isinstance(arguments, str):
@@ -329,32 +334,44 @@ class OpenAIAgent(BaseAgent):
                                 arguments = arguments
 
                         # For ECM fits, ensure model_code is preserved as full function string
-                        if func_name == 'fit_ecm' and isinstance(arguments, dict):
+                        if func_name == "fit_ecm" and isinstance(arguments, dict):
                             # Preserve the full model code if it exists
-                            if 'model_code' in arguments and not arguments['model_code'].startswith('def '):
-                                self.logger.warning(f"Model code appears truncated: {arguments['model_code']}")
+                            if "model_code" in arguments and not arguments[
+                                "model_code"
+                            ].startswith("def "):
+                                self.logger.warning(
+                                    f"Model code appears truncated: {arguments['model_code']}"
+                                )
 
                         # Construct the tool call
                         tool_call = {
-                            "id": call.id if hasattr(call, 'id') else f"call_{func_name}",
+                            "id": (
+                                call.id if hasattr(call, "id") else f"call_{func_name}"
+                            ),
                             "type": "function",
                             "function": {
                                 "name": func_name,
                                 # Ensure arguments are properly JSON serialized if they're a dict
-                                "arguments": json.dumps(arguments) if isinstance(arguments, dict) else arguments
-                            }
+                                "arguments": (
+                                    json.dumps(arguments)
+                                    if isinstance(arguments, dict)
+                                    else arguments
+                                ),
+                            },
                         }
                         tool_calls.append(tool_call)
                     formatted["tool_calls"] = tool_calls
                 return formatted
 
             # For tool responses
-            if message.get('role') in ['tool', 'function']:
+            if message.get("role") in ["tool", "function"]:
                 return {
                     "role": "tool",
-                    "tool_call_id": message.get('tool_call_id', f"call_{message['name']}"),
-                    "name": message['name'],
-                    "content": message['content']
+                    "tool_call_id": message.get(
+                        "tool_call_id", f"call_{message['name']}"
+                    ),
+                    "name": message["name"],
+                    "content": message["content"],
                 }
 
             # For system/user messages, preserve them exactly as is
@@ -365,8 +382,9 @@ class OpenAIAgent(BaseAgent):
             self.logger.debug(f"Problematic message: {message}")
             raise
 
-    def create_chat_completion(self, messages: List[Dict], tools: List[Dict] = None,
-                             tool_choice: str = "auto") -> Any:
+    def create_chat_completion(
+        self, messages: List[Dict], tools: List[Dict] = None, tool_choice: str = "auto"
+    ) -> Any:
         """Make API call to OpenAI"""
         try:
             formatted_messages = []
@@ -384,7 +402,7 @@ class OpenAIAgent(BaseAgent):
                 model=self.model,
                 messages=formatted_messages,
                 tools=tools if tools else self.tools,
-                tool_choice=tool_choice
+                tool_choice=tool_choice,
             )
             return response
 

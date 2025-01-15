@@ -13,6 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 import contextlib
 import io
 
+
 class ResultExporter:
     """Handles exporting analysis results to various formats with async I/O"""
 
@@ -20,9 +21,7 @@ class ResultExporter:
 
     @staticmethod
     async def export_async(
-        result: AnalysisResult,
-        file_path: Union[str, Path],
-        format: str = 'json'
+        result: AnalysisResult, file_path: Union[str, Path], format: str = "json"
     ) -> None:
         """Async export of analysis results to file"""
         try:
@@ -32,10 +31,10 @@ class ResultExporter:
             ResultExporter.logger.info(f"Exporting results to {file_path}")
 
             export_funcs = {
-                'json': ResultExporter._export_json_async,
-                'csv': ResultExporter._export_csv_async,
-                'excel': ResultExporter._export_excel_async,
-                'md': ResultExporter._export_markdown_async
+                "json": ResultExporter._export_json_async,
+                "csv": ResultExporter._export_csv_async,
+                "excel": ResultExporter._export_excel_async,
+                "md": ResultExporter._export_markdown_async,
             }
 
             if format not in export_funcs:
@@ -53,9 +52,7 @@ class ResultExporter:
 
     @staticmethod
     def export(
-        result: AnalysisResult,
-        file_path: Union[str, Path],
-        format: str = 'json'
+        result: AnalysisResult, file_path: Union[str, Path], format: str = "json"
     ) -> None:
         """Synchronous wrapper for async export"""
         asyncio.run(ResultExporter.export_async(result, file_path, format))
@@ -70,7 +67,7 @@ class ResultExporter:
             buffer = io.StringIO()
             json.dump(data, buffer, indent=2, default=ResultExporter._json_serialize)
 
-            async with aiofiles.open(file_path, 'w') as f:
+            async with aiofiles.open(file_path, "w") as f:
                 await f.write(buffer.getvalue())
             buffer.close()
         except Exception as e:
@@ -85,13 +82,19 @@ class ResultExporter:
 
             # Prepare export tasks
             if result.ecm_fit:
-                tasks.append(ResultExporter._write_ecm_csv(result, f"{base_path}_ecm.csv"))
+                tasks.append(
+                    ResultExporter._write_ecm_csv(result, f"{base_path}_ecm.csv")
+                )
 
             if result.drt_fit:
-                tasks.append(ResultExporter._write_drt_csv(result, f"{base_path}_drt.csv"))
+                tasks.append(
+                    ResultExporter._write_drt_csv(result, f"{base_path}_drt.csv")
+                )
 
             # Always write summary
-            tasks.append(ResultExporter._write_summary(result, f"{base_path}_summary.txt"))
+            tasks.append(
+                ResultExporter._write_summary(result, f"{base_path}_summary.txt")
+            )
 
             # Execute all file writes concurrently
             await asyncio.gather(*tasks)
@@ -106,32 +109,42 @@ class ResultExporter:
             buffer = io.BytesIO()
 
             def write_excel():
-                with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+                with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
                     if result.ecm_fit:
-                        pd.DataFrame({
-                            'Parameter': [p['name'] for p in result.ecm_fit.param_info],
-                            'Value': result.ecm_fit.parameters,
-                            'Error': result.ecm_fit.errors
-                        }).to_excel(writer, sheet_name='ECM_Fit', index=False)
+                        pd.DataFrame(
+                            {
+                                "Parameter": [
+                                    p["name"] for p in result.ecm_fit.param_info
+                                ],
+                                "Value": result.ecm_fit.parameters,
+                                "Error": result.ecm_fit.errors,
+                            }
+                        ).to_excel(writer, sheet_name="ECM_Fit", index=False)
 
                     if result.drt_fit:
-                        pd.DataFrame({
-                            'tau': result.drt_fit.tau,
-                            'gamma': ResultExporter._process_gamma(result.drt_fit.gamma)
-                        }).to_excel(writer, sheet_name='DRT_Results', index=False)
+                        pd.DataFrame(
+                            {
+                                "tau": result.drt_fit.tau,
+                                "gamma": ResultExporter._process_gamma(
+                                    result.drt_fit.gamma
+                                ),
+                            }
+                        ).to_excel(writer, sheet_name="DRT_Results", index=False)
 
                     # Always write summary
-                    pd.DataFrame({
-                        'Summary': [result.summary],
-                        'Recommendations': ['\n'.join(result.recommendations)]
-                    }).to_excel(writer, sheet_name='Summary', index=False)
+                    pd.DataFrame(
+                        {
+                            "Summary": [result.summary],
+                            "Recommendations": ["\n".join(result.recommendations)],
+                        }
+                    ).to_excel(writer, sheet_name="Summary", index=False)
 
             # Run Excel writing in thread pool
             with ThreadPoolExecutor() as pool:
                 await asyncio.get_event_loop().run_in_executor(pool, write_excel)
 
             # Write buffer to file asynchronously
-            async with aiofiles.open(file_path, 'wb') as f:
+            async with aiofiles.open(file_path, "wb") as f:
                 await f.write(buffer.getvalue())
             buffer.close()
         except Exception as e:
@@ -140,36 +153,38 @@ class ResultExporter:
     @staticmethod
     async def _write_ecm_csv(result: AnalysisResult, filepath: str) -> None:
         """Helper for async ECM CSV writing"""
-        df = pd.DataFrame({
-            'Parameter': [p['name'] for p in result.ecm_fit.param_info],
-            'Value': result.ecm_fit.parameters,
-            'Error': result.ecm_fit.errors
-        })
-        async with aiofiles.open(filepath, 'w') as f:
+        df = pd.DataFrame(
+            {
+                "Parameter": [p["name"] for p in result.ecm_fit.param_info],
+                "Value": result.ecm_fit.parameters,
+                "Error": result.ecm_fit.errors,
+            }
+        )
+        async with aiofiles.open(filepath, "w") as f:
             await f.write(df.to_csv(index=False))
 
     @staticmethod
     async def _write_drt_csv(result: AnalysisResult, filepath: str) -> None:
         """Helper for async DRT CSV writing"""
         data = {
-            'tau': result.drt_fit.tau,
-            'gamma': ResultExporter._process_gamma(result.drt_fit.gamma)
+            "tau": result.drt_fit.tau,
+            "gamma": ResultExporter._process_gamma(result.drt_fit.gamma),
         }
         df = pd.DataFrame(data)
-        async with aiofiles.open(filepath, 'w') as f:
+        async with aiofiles.open(filepath, "w") as f:
             await f.write(df.to_csv(index=False))
 
     @staticmethod
     async def _write_summary(result: AnalysisResult, filepath: str) -> None:
         """Helper for async summary writing"""
-        async with aiofiles.open(filepath, 'w') as f:
+        async with aiofiles.open(filepath, "w") as f:
             await f.write(result.summary)
 
     @staticmethod
     def _process_gamma(gamma):
         """Process gamma values for export"""
         if isinstance(gamma, complex):
-            return pd.Series({'gamma_real': gamma.real, 'gamma_imag': gamma.imag})
+            return pd.Series({"gamma_real": gamma.real, "gamma_imag": gamma.imag})
         return gamma
 
     @staticmethod
@@ -182,7 +197,7 @@ class ResultExporter:
         if isinstance(obj, np.floating):
             return float(obj)
         if isinstance(obj, complex):
-            return {'real': obj.real, 'imag': obj.imag}
+            return {"real": obj.real, "imag": obj.imag}
         raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
     @staticmethod
@@ -212,14 +227,14 @@ class ResultExporter:
                 markdown_content += "| Parameter | Value | Error |\n"
                 markdown_content += "|-----------|--------|--------|\n"
                 for p, v, e in zip(
-                    [p['name'] for p in result.ecm_fit.param_info],
+                    [p["name"] for p in result.ecm_fit.param_info],
                     result.ecm_fit.parameters,
-                    result.ecm_fit.errors
+                    result.ecm_fit.errors,
                 ):
                     markdown_content += f"| {p} | {v:.6e} | {e:.6e} |\n"
 
             # Write markdown file
-            async with aiofiles.open(file_path, 'w') as f:
+            async with aiofiles.open(file_path, "w") as f:
                 await f.write(markdown_content)
 
         except (IOError, OSError) as e:

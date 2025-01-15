@@ -14,13 +14,17 @@ from ..agent.analysis import ImpedanceAnalysisAgent
 from ..core.logging import setup_logging
 from ..core.env import env
 import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend
+
+matplotlib.use("Agg")  # Use non-interactive backend
 import matplotlib.pyplot as plt
 import asyncio.exceptions
 
 app = typer.Typer()
 
-async def run_async_tasks(result, output_path, output_format, plot, plot_dir, plot_format, show_plots):
+
+async def run_async_tasks(
+    result, output_path, output_format, plot, plot_dir, plot_format, show_plots
+):
     """Run export and plotting tasks concurrently"""
     export_task = None
     plot_task = None
@@ -32,18 +36,20 @@ async def run_async_tasks(result, output_path, output_format, plot, plot_dir, pl
                 ResultExporter.export_async(result, output_path, output_format)
             )
             markdown_task = asyncio.create_task(
-                ResultExporter.export_async(result,
-                    Path(output_path).parent / "analysis_summary.md", 'md')
+                ResultExporter.export_async(
+                    result, Path(output_path).parent / "analysis_summary.md", "md"
+                )
             )
 
         if plot and plot_dir:
             plot_task = asyncio.create_task(
-                asyncio.to_thread(PlotManager.create_plots,
+                asyncio.to_thread(
+                    PlotManager.create_plots,
                     result=result,
                     output_dir=plot_dir,
                     file_format=plot_format,
                     show=show_plots,
-                    dpi=300
+                    dpi=300,
                 )
             )
 
@@ -67,11 +73,14 @@ async def run_async_tasks(result, output_path, output_format, plot, plot_dir, pl
     except Exception as e:
         logging.error(f"Error in async tasks: {str(e)}")
 
+
 @app.command()
 def analyze(
     data_path: str = typer.Argument(..., help="Path to impedance data file"),
     provider: str = typer.Option("deepseek", help="LLM provider (deepseek/openai)"),
-    ecm: Optional[str] = typer.Option(None, help="Path to the equivalent circuit model(ECM) configuration file"),
+    ecm: Optional[str] = typer.Option(
+        None, help="Path to the equivalent circuit model(ECM) configuration file"
+    ),
     output_path: Optional[str] = typer.Option(None, help="Path for output files"),
     output_format: str = typer.Option("json", help="Output format (json/csv/excel)"),
     plot_format: str = typer.Option("png", help="Plot format (png/pdf/svg)"),
@@ -79,7 +88,7 @@ def analyze(
     show_plots: bool = typer.Option(False, help="Display plots in window"),
     log_level: str = typer.Option(env.log_level, help="Logging level"),
     debug: bool = typer.Option(False, help="Enable debug mode"),
-    workers: int = typer.Option(None, help="Number of worker processes")
+    workers: int = typer.Option(None, help="Number of worker processes"),
 ):
     """Analyze impedance data using ECM and/or DRT analysis with parallel processing"""
     loop = None
@@ -92,16 +101,22 @@ def analyze(
         # Validate provider
         available_providers = env.get_available_providers()
         if not available_providers:
-            logger.error("No LLM providers are properly configured. Please check your .env file.")
+            logger.error(
+                "No LLM providers are properly configured. Please check your .env file."
+            )
             raise typer.Exit(1)
 
         if provider not in available_providers:
-            logger.error(f"Provider '{provider}' is not available. Available providers: {', '.join(available_providers)}")
+            logger.error(
+                f"Provider '{provider}' is not available. Available providers: {', '.join(available_providers)}"
+            )
             raise typer.Exit(1)
 
         # Early validation of plot settings
         if plot and not output_path:
-            logger.warning("Plot generation requires an output path. Creating default 'results' directory.")
+            logger.warning(
+                "Plot generation requires an output path. Creating default 'results' directory."
+            )
             output_path = "results/analysis.json"
 
         # Create output directories if needed
@@ -129,7 +144,9 @@ def analyze(
         async def load_data_and_config():
             with ThreadPoolExecutor(max_workers=2) as pool:
                 loop = asyncio.get_running_loop()
-                data_future = loop.run_in_executor(pool, ImpedanceLoader.load, data_path)
+                data_future = loop.run_in_executor(
+                    pool, ImpedanceLoader.load, data_path
+                )
 
                 if ecm:
                     config_future = loop.run_in_executor(pool, Config.load_model, ecm)
@@ -141,7 +158,7 @@ def analyze(
                 return data, ecm_cfg
 
         # Set up event loop with policy
-        if os.name == 'posix':
+        if os.name == "posix":
             policy = asyncio.get_event_loop_policy()
             policy.set_event_loop(policy.new_event_loop())
         loop = asyncio.new_event_loop()
@@ -165,7 +182,7 @@ def analyze(
                     plot,
                     plot_dir,
                     plot_format,
-                    show_plots
+                    show_plots,
                 )
             )
 
@@ -193,16 +210,19 @@ def analyze(
                 for task in pending:
                     task.cancel()
 
-                loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+                loop.run_until_complete(
+                    asyncio.gather(*pending, return_exceptions=True)
+                )
             except Exception as e:
                 logger.error(f"Error during task cleanup: {str(e)}")
 
         # Close plots
-        plt.close('all')
+        plt.close("all")
 
         # Close loop
         if loop and not loop.is_closed():
             loop.close()
+
 
 @app.command()
 def list_providers():
@@ -216,15 +236,18 @@ def list_providers():
     else:
         typer.echo("No LLM providers are configured. Please check your .env file.")
 
+
 # Add version command
 @app.command()
 def version():
     """Show the version of the impedance agent"""
     typer.echo("Impedance Agent v0.1.0")
 
+
 def main():
     """Main entry point for the CLI"""
     app()
+
 
 if __name__ == "__main__":
     main()
