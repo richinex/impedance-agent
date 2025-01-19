@@ -13,7 +13,7 @@ Here's a complete example of analyzing impedance data:
    # Load and analyze data
    results = agent.analyze(
        data_file="examples/data/randles_circuit.txt",
-       model_config="examples/models/randles.yaml"
+       ecm="examples/models/randles.yaml"
    )
 
    # Print results

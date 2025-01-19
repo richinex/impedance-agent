@@ -14,7 +14,7 @@ def main():
     data = ImpedanceData(frequency=freq, real=z_real, imaginary=z_imag)
 
     # Model configuration
-    model_config = {
+    ecm_config = {
         "model_code": """
         def impedance_model(p, f):
             w = 2 * jnp.pi * f
@@ -31,7 +31,7 @@ def main():
 
     # Run analysis with specified provider
     agent = ImpedanceAnalysisAgent(provider="deepseek")  # or "openai"
-    result = agent.analyze(data, model_config)
+    result = agent.analyze(data, ecm_config)
 
     # Print results
     print(result.summary)
