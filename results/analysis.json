@@ -1,438 +1,246 @@
 {
   "ecm_fit": {
     "parameters": [
-      18.035947796558336,
-      1.409368403230293e-06,
-      0.8760973617863438,
-      4.004081756038153,
-      0.00014248232925564866,
-      1e-12,
-      0.011352480008539917,
-      14.60265268130267,
-      0.07316707062080688,
-      0.4598006200501176,
-      3.2084862126453975
+      20.660011714277704,
+      6.5069677432815585,
+      9.07010235411135e-07
     ],
     "errors": [
-      1.9578296492738563,
-      3.2115369980905608e-06,
-      0.23582452741892973,
-      46931052692.06605,
-      10.550257245172979,
-      0.02344173677221362,
-      46931052692.24399,
-      0.6460347319575613,
-      0.029788944914595647,
-      0.007228763385120671,
-      6.226627765319922
+      0.4391153328577766,
+      0.5227964337567933,
+      1.954106792569015e-07
     ],
     "param_info": [
       {
         "name": "Rs",
-        "initialValue": 1.0,
+        "initialValue": 0.1,
         "lowerBound": 1e-06,
         "upperBound": 1000.0
       },
       {
-        "name": "Qh",
+        "name": "Rct",
+        "initialValue": 1.0,
+        "lowerBound": 1e-06,
+        "upperBound": 1000000.0
+      },
+      {
+        "name": "Cdl",
         "initialValue": 1e-06,
         "lowerBound": 1e-12,
         "upperBound": 0.001
-      },
-      {
-        "name": "nh",
-        "initialValue": 0.8,
-        "lowerBound": 0,
-        "upperBound": 1
-      },
-      {
-        "name": "Rad",
-        "initialValue": 1.0,
-        "lowerBound": 1e-06,
-        "upperBound": 1000000.0
-      },
-      {
-        "name": "Wad",
-        "initialValue": 1.0,
-        "lowerBound": 1e-06,
-        "upperBound": 1000000.0
-      },
-      {
-        "name": "Cad",
-        "initialValue": 1e-06,
-        "lowerBound": 1e-12,
-        "upperBound": 0.001
-      },
-      {
-        "name": "Rint",
-        "initialValue": 1.0,
-        "lowerBound": 1e-06,
-        "upperBound": 1000000.0
-      },
-      {
-        "name": "Wint",
-        "initialValue": 1.0,
-        "lowerBound": 1e-06,
-        "upperBound": 1000000.0
-      },
-      {
-        "name": "tau",
-        "initialValue": 1.0,
-        "lowerBound": 1e-06,
-        "upperBound": 1000000.0
-      },
-      {
-        "name": "alpha",
-        "initialValue": 0.5,
-        "lowerBound": 0,
-        "upperBound": 1
-      },
-      {
-        "name": "Rp",
-        "initialValue": 1.0,
-        "lowerBound": 1e-06,
-        "upperBound": 1000000.0
       }
     ],
     "correlation_matrix": [
       [
+        1.0000000000000002,
+        -0.7268478876066804,
+        0.7454180859705793
+      ],
+      [
+        -0.7268478876066804,
         1.0,
-        0.5714901631926729,
-        -0.6727054067366145,
-        0.15117600735612358,
-        0.0035159172711492982,
-        -0.0035172304764380198,
-        -0.00043198418215739827,
-        -0.05001175365721976,
-        -0.06375043986829422,
-        0.005291058957374798,
-        -0.9779406482256275
+        -0.4118042696332855
       ],
       [
-        0.5714901631926729,
-        1.0000000000000002,
-        -0.9862984647782432,
-        0.18681363210856727,
-        0.01180649401256349,
-        -0.011808114583695056,
-        -0.0005451117907801263,
-        -0.03851535381019496,
-        -0.031167425208635142,
-        0.26603408668810175,
-        -0.6997765807485307
-      ],
-      [
-        -0.6727054067366145,
-        -0.9862984647782435,
-        1.0000000000000002,
-        -0.19223457129917365,
-        -0.010479270111958629,
-        0.010480947985940561,
-        0.0005616706558118729,
-        0.0637171454777711,
-        0.059596015587405106,
-        -0.204386385782642,
-        0.7946992923778026
-      ],
-      [
-        0.15117600735612358,
-        0.18681363210856727,
-        -0.1922345712991736,
-        1.0000000000000002,
-        0.002214416410995039,
-        -0.005198558484162581,
-        -0.9784089074881692,
-        0.04092242495150279,
-        0.039744509204685655,
-        0.09493331963665624,
-        -0.17108441054798754
-      ],
-      [
-        0.003515917271149298,
-        0.011806494012563487,
-        -0.010479270111958629,
-        0.0022144164109950387,
-        1.0000000000000002,
-        -0.9999953487321372,
-        5.924869498607737e-06,
-        0.0024492167599227932,
-        0.024912846413318014,
-        -0.0013665882514461048,
-        -0.0048671474054660605
-      ],
-      [
-        -0.0035172304764380198,
-        -0.011808114583695056,
-        0.010480947985940563,
-        -0.005198558484162581,
-        -0.9999953487321372,
-        1.0000000000000002,
-        0.0030440774680418536,
-        -0.0024495618519223858,
-        -0.024913076753599498,
-        0.0013657478159217113,
-        0.004868626326103771
-      ],
-      [
-        -0.0004319841821573984,
-        -0.0005451117907801263,
-        0.0005616706558118729,
-        -0.9784089074881693,
-        5.924869498607737e-06,
-        0.0030440774680418536,
-        1.0,
-        -0.00011612518368294864,
-        -0.00011264659224564043,
-        -0.0002718250990743979,
-        0.0004880123127640156
-      ],
-      [
-        -0.05001175365721976,
-        -0.03851535381019494,
-        0.06371714547777113,
-        0.04092242495150279,
-        0.0024492167599227937,
-        -0.002449561851922386,
-        -0.00011612518368294866,
-        0.9999999999999999,
-        0.9932148952592001,
-        0.8543130285528046,
-        0.06811976937152349
-      ],
-      [
-        -0.06375043986829422,
-        -0.031167425208635115,
-        0.059596015587405134,
-        0.039744509204685655,
-        0.02491284641331802,
-        -0.024913076753599498,
-        -0.00011264659224564043,
-        0.9932148952592001,
-        0.9999999999999999,
-        0.8369962233400895,
-        0.07883787817349026
-      ],
-      [
-        0.005291058957374818,
-        0.2660340866881018,
-        -0.204386385782642,
-        0.09493331963665626,
-        -0.0013665882514461048,
-        0.0013657478159217113,
-        -0.0002718250990743979,
-        0.8543130285528046,
-        0.8369962233400895,
-        1.0,
-        -0.029484996517884717
-      ],
-      [
-        -0.9779406482256275,
-        -0.6997765807485307,
-        0.7946992923778025,
-        -0.17108441054798754,
-        -0.0048671474054660605,
-        0.004868626326103771,
-        0.0004880123127640156,
-        0.06811976937152349,
-        0.07883787817349026,
-        -0.029484996517884707,
+        0.7454180859705793,
+        -0.4118042696332855,
         1.0
       ]
     ],
-    "chi_square": 0.00013300359704214107,
-    "aic": -346.5170750998366,
-    "wrms": 1.6835898359764693e-06,
-    "dof": 79,
+    "chi_square": 0.4051677178472902,
+    "aic": 359.4341433700729,
+    "wrms": 0.004657100205141267,
+    "dof": 87,
     "measurement_id": null,
     "timestamp": null,
     "Z_fit": [
       {
-        "real": 19.581990860124478,
-        "imag": -1.2867008374066695
+        "real": 20.678884489571974,
+        "imag": -0.34992621853570605
       },
       {
-        "real": 19.76602605700468,
-        "imag": -1.4510160594708756
+        "real": 20.689872333807415,
+        "imag": -0.4397845284631335
       },
       {
-        "real": 19.991346793144448,
-        "imag": -1.6244135392043464
+        "real": 20.707210913002278,
+        "imag": -0.5521737944246353
       },
       {
-        "real": 20.262842606343504,
-        "imag": -1.7965282660074553
+        "real": 20.734501300680662,
+        "imag": -0.6922085216551016
       },
       {
-        "real": 20.581327178398,
-        "imag": -1.9542686604572888
+        "real": 20.777284405921712,
+        "imag": -0.8656423842961524
       },
       {
-        "real": 20.942032779202254,
-        "imag": -2.083684920710994
+        "real": 20.843938064586606,
+        "imag": -1.0784126882884701
       },
       {
-        "real": 21.33423010017594,
-        "imag": -2.1727705275932947
+        "real": 20.946774021180797,
+        "imag": -1.335559980063433
       },
       {
-        "real": 21.74261206531306,
-        "imag": -2.2143390149332083
+        "real": 21.103076722293398,
+        "imag": -1.6391165651066306
       },
       {
-        "real": 22.1502026421495,
-        "imag": -2.207745727959251
+        "real": 21.335326852262234,
+        "imag": -1.9844906862527747
       },
       {
-        "real": 22.541721879885458,
-        "imag": -2.1586858697658196
+        "real": 21.669063591988213,
+        "imag": -2.3553518479515687
       },
       {
-        "real": 22.906137948450784,
-        "imag": -2.0772663499323216
+        "real": 22.126269365551387,
+        "imag": -2.718635639481506
       },
       {
-        "real": 23.23760217436329,
-        "imag": -1.9753420138073043
+        "real": 22.713253621384652,
+        "imag": -3.024000087565912
       },
       {
-        "real": 23.534981311207147,
-        "imag": -1.8641634699806557
+        "real": 23.40715928347916,
+        "imag": -3.2138420701488664
       },
       {
-        "real": 23.800509378706884,
-        "imag": -1.7529521128891854
+        "real": 24.151721905694593,
+        "imag": -3.24475045628976
       },
       {
-        "real": 24.038348415978415,
-        "imag": -1.6483982567546958
+        "real": 24.87201383813011,
+        "imag": -3.109083476396838
       },
       {
-        "real": 24.253421027032427,
-        "imag": -1.5548027324327942
+        "real": 25.502278359865485,
+        "imag": -2.8391770991320606
       },
       {
-        "real": 24.45063369818914,
-        "imag": -1.47453521517686
+        "real": 26.007120588128544,
+        "imag": -2.4903597437212963
       },
       {
-        "real": 24.63444941919128,
-        "imag": -1.408565016954374
+        "real": 26.383609454095115,
+        "imag": -2.1174736790024435
       },
       {
-        "real": 24.808780305701674,
-        "imag": -1.3569115052854388
+        "real": 26.649739304866618,
+        "imag": -1.76014988382909
       },
       {
-        "real": 24.976873085286023,
-        "imag": -1.3190457676734428
+        "real": 26.830775502260344,
+        "imag": -1.4403593970725117
       },
       {
-        "real": 25.14139069418361,
-        "imag": -1.294133543534155
+        "real": 26.95071717596746,
+        "imag": -1.166380004958525
       },
       {
-        "real": 25.304629687206223,
-        "imag": -1.2811980602933544
+        "real": 27.028842382367863,
+        "imag": -0.9379614282470607
       },
       {
-        "real": 25.46828561912677,
-        "imag": -1.2792650907323542
+        "real": 27.0791147447261,
+        "imag": -0.7510077525677354
       },
       {
-        "real": 25.63408121073278,
-        "imag": -1.2874106584259526
+        "real": 27.111267576732764,
+        "imag": -0.5995094643042316
       },
       {
-        "real": 25.803187244058442,
-        "imag": -1.304816608428794
+        "real": 27.131719265945154,
+        "imag": -0.47769618832712346
       },
       {
-        "real": 25.976698787328708,
-        "imag": -1.3307892000862942
+        "real": 27.144690301988724,
+        "imag": -0.38018154856125
       },
       {
-        "real": 26.155358133439144,
-        "imag": -1.3647395996123446
+        "real": 27.152894412001377,
+        "imag": -0.3024112243278216
       },
       {
-        "real": 26.340368681460454,
-        "imag": -1.4063523533454017
+        "real": 27.15808842781312,
+        "imag": -0.2403634609352747
       },
       {
-        "real": 26.531889443283237,
-        "imag": -1.455275279562198
+        "real": 27.16136453594788,
+        "imag": -0.19106173468704601
       },
       {
-        "real": 26.735972394487433,
-        "imag": -1.5130390554773914
+        "real": 27.1634748872917,
+        "imag": -0.15096967798981187
       },
       {
-        "real": 26.944819032976852,
-        "imag": -1.577479146144317
+        "real": 27.16477444338421,
+        "imag": -0.11976265704730635
       },
       {
-        "real": 27.162022358808247,
-        "imag": -1.6497388030704496
+        "real": 27.16559072115714,
+        "imag": -0.0950501677206796
       },
       {
-        "real": 27.37023182143405,
-        "imag": -1.7237718255703236
+        "real": 27.166071891241558,
+        "imag": -0.07684192265673799
       },
       {
-        "real": 27.615726566156994,
-        "imag": -1.8169110937400292
+        "real": 27.166418024397416,
+        "imag": -0.060439327155094376
       },
       {
-        "real": 27.859513857710716,
-        "imag": -1.915631111006215
+        "real": 27.16662334925126,
+        "imag": -0.04813583343164535
       },
       {
-        "real": 28.128860092612257,
-        "imag": -2.031941024776559
+        "real": 27.166758908779798,
+        "imag": -0.037882121799513904
       },
       {
-        "real": 28.418193321738563,
-        "imag": -2.1653701715041
+        "real": 27.166844087922982,
+        "imag": -0.029678738715780254
       },
       {
-        "real": 28.96211657436306,
-        "imag": -2.4397158277975954
+        "real": 27.166921473586868,
+        "imag": -0.019424120980567075
       },
       {
-        "real": 29.293153283392616,
-        "imag": -2.62116095904432
+        "real": 27.16694337767658,
+        "imag": -0.015322184277567942
       },
       {
-        "real": 29.762477163154504,
-        "imag": -2.895813402676703
+        "real": 27.166960110066686,
+        "imag": -0.011220211039890446
       },
       {
-        "real": 30.0904886561785,
-        "imag": -3.098875520066375
+        "real": 27.166966536848488,
+        "imag": -0.00916921377700941
       },
       {
-        "real": 30.532520673158633,
-        "imag": -3.385403936652299
+        "real": 27.16697167067739,
+        "imag": -0.007118211048242792
       },
       {
-        "real": 31.187815719234862,
-        "imag": -3.833591210606907
+        "real": 27.166975511547275,
+        "imag": -0.005067204076211732
       },
       {
-        "real": 32.35566376394872,
-        "imag": -4.6860175844815295
+        "real": 27.166978059453562,
+        "imag": -0.0030161940835458055
       },
       {
-        "real": 35.93821524744567,
-        "imag": -7.540148156535903
+        "real": 27.16697931439321,
+        "imag": -0.0009651822928805866
       }
     ],
     "fit_quality": {
-      "vector_difference": 0.0015474321881321633,
-      "vector_quality": "excellent",
-      "path_deviation": 0.05865561288859542,
-      "path_quality": "acceptable",
-      "overall_quality": "acceptable"
+      "vector_difference": 0.08035176416240863,
+      "vector_quality": "acceptable",
+      "path_deviation": 1.1793445974131993,
+      "path_quality": "poor",
+      "overall_quality": "poor"
     }
   },
   "drt_fit": {
@@ -546,7 +354,7 @@
       0.09524452640584774,
       0.3364441209575217
     ],
-    "regularization_param": 2.5301887706968225e-13,
+    "regularization_param": 2.5301887715738874e-13,
     "residual": 1.2224285408490292,
     "Z_fit": [
       16.52520893007225,
@@ -974,7 +782,7 @@
     "mean_residual": 0.0004563709750012444,
     "fit_quality": null
   },
-  "summary": "### Comprehensive Analysis of Impedance Data\n\n#### 1. **Path Following Analysis (ECM Fit)**\n   - **Path Deviation**: 0.0587 (5.87% deviation)\n   - **Rating**: **Acceptable**\n   - **Implications**:\n     - The model follows the experimental arc shape reasonably well.\n     - The deviation is within the acceptable range (< 0.10), indicating the model structure is **valid**.\n     - No immediate need to modify the model structure, but further refinement is possible.\n\n#### 2. **Vector Difference Analysis (ECM Fit)**\n   - **Vector Difference**: 0.00155 (0.155% average deviation)\n   - **Rating**: **Excellent**\n   - **Implications**:\n     - The fit closely matches the experimental data in both real and imaginary components.\n     - The residuals are minimal, indicating a high-quality fit.\n\n#### 3. **Parameter Correlation Analysis**\n   - **Strong Correlations**:\n     - **Qh-nh**: Expected strong correlation (|r| = 0.986), typical for CPE parameters.\n     - **Wad-Cad**: Strong correlation (|r| = 0.999), expected for diffusion-related parameters.\n     - **Rint-Wint**: Strong correlation (|r| = 0.993), indicating a physical relationship between interfacial resistance and diffusion.\n   - **Other Correlations**:\n     - **Rs-Rp**: Strong correlation (|r| = 0.978), suggesting a possible overparameterization or redundant elements.\n     - **Rad-Rint**: Moderate correlation (|r| = 0.151), no significant overparameterization.\n   - **Implications**:\n     - The strong Qh-nh and Wad-Cad correlations are **expected** and do not indicate overparameterization.\n     - The Rs-Rp correlation suggests potential redundancy in the model. Consider simplifying the model by fixing or removing one of these parameters.\n\n#### 4. **DRT Analysis**\n   - **Peak Frequencies**: 29.5 Hz, 123 Hz, 250 Hz, 1.58 kHz, 19.9 kHz, 125.6 kHz\n   - **Peak Polarizations**: 0.123, 0.016, 0.137, 0.117, 0.095, 0.336\n   - **Implications**:\n     - The DRT reveals **six distinct processes** with characteristic time constants.\n     - The highest polarization (0.336) at 125.6 kHz suggests a dominant high-frequency process, likely related to charge transfer or interfacial phenomena.\n     - The lower-frequency peaks (29.5 Hz, 123 Hz, 250 Hz) may correspond to diffusion or bulk processes.\n     - The DRT results align well with the ECM fit, validating the model structure.\n\n#### 5. **Lin-KK Analysis**\n   - **Validation Metrics**:\n     - **M**: 22\n     - **\u03bc**: 0.611\n     - **Max Residual**: 0.00112\n     - **Mean Residual**: 0.000456\n   - **Implications**:\n     - The data satisfies the Kramers-Kronig relations, indicating **high-quality measurements**.\n     - The residuals are minimal, confirming the validity of the experimental data.\n\n#### 6. **ECM Fit Metrics**\n   - **Chi-Square**: 0.000133\n   - **AIC**: -346.52\n   - **WRMS**: 1.68e-06\n   - **Implications**:\n     - The low chi-square and AIC values indicate a **high-quality fit**.\n     - The weighted root mean square (WRMS) is exceptionally low, further confirming the fit's accuracy.\n\n#### 7. **Residual Analysis**\n   - **Real Residuals**: Range from -0.00069 to 0.00076\n   - **Imaginary Residuals**: Range from -0.00042 to 0.00086\n   - **Implications**:\n     - Residuals are randomly distributed around zero, indicating no systematic errors.\n     - The residuals are within acceptable limits, confirming the fit's reliability.\n\n---\n\n### Key Recommendations\n\n#### For ECM Fit:\n1. **Model Refinement**:\n   - Consider simplifying the model by addressing the strong Rs-Rp correlation. Fixing one of these parameters may improve parameter identifiability.\n   - Validate the physical meaning of the parameters, especially Rad, Wad, and Rint, to ensure they align with the system's electrochemical processes.\n\n2. **Parameter Optimization**:\n   - Re-optimize the model with tighter bounds or fixed parameters to reduce uncertainties, especially for Rad and Rint, which have large errors.\n\n3. **Physical Interpretation**:\n   - Use the DRT peaks to assign physical processes to the ECM elements. For example:\n     - High-frequency peaks (125.6 kHz) may correspond to charge transfer resistance.\n     - Mid-frequency peaks (1.58 kHz, 19.9 kHz) may relate to diffusion or interfacial processes.\n     - Low-frequency peaks (29.5 Hz, 123 Hz, 250 Hz) may represent bulk or electrode processes.\n\n#### For Data Quality:\n- The data is of **high quality**, as confirmed by Lin-KK validation and low residuals.\n- No significant measurement artifacts or system limitations were detected.\n\n#### For Further Investigation:\n- Perform additional experiments at lower frequencies to better characterize the low-frequency processes.\n- Explore alternative model structures if further refinement is needed.\n\n---\n\n### Final Notes\nThe current model provides an **acceptable** representation of the experimental data. However, minor refinements and physical validation are recommended to enhance its accuracy and interpretability.\n\n**NOTICE TO RESEARCHERS: LLMs hallucinate. All analyses and recommendations are intended as guidance to be evaluated alongside physical understanding and domain expertise.**",
+  "summary": "### Analysis Report\n\n#### 1. **Path Following Analysis (ECM Fit)**\n- **Path Deviation**: 1.179 (Poor)\n  - The model does NOT follow the experimental arc shape adequately.\n  - **Implications**: The model structure is invalid. The circuit elements are missing or incorrectly specified. This cannot be fixed by parameter adjustment alone. The model structure MUST be modified.\n\n#### 2. **Vector Difference Analysis (ECM Fit)**\n- **Vector Difference**: 0.080 (Acceptable)\n  - While the vector difference is acceptable, this metric is secondary to path following. Since the path deviation is poor, the vector difference is not meaningful in this context.\n\n#### 3. **Parameter Correlation Analysis (ECM Fit)**\n- **Correlation Matrix**:\n  ```\n  [[ 1.        , -0.72684789,  0.74541809],\n   [-0.72684789,  1.        , -0.41180427],\n   [ 0.74541809, -0.41180427,  1.        ]]\n  ```\n  - **Rs-Rct Correlation**: -0.727 (Moderate negative correlation)\n  - **Rs-Cdl Correlation**: 0.745 (Moderate positive correlation)\n  - **Rct-Cdl Correlation**: -0.412 (Weak negative correlation)\n  - **Interpretation**: The moderate correlations between Rs, Rct, and Cdl suggest some interdependence, but this is not the primary issue. The poor path deviation indicates structural inadequacy, not overparameterization.\n\n#### 4. **DRT Analysis**\n- **Peak Frequencies**: [29.5, 123.0, 250.5, 1581.0, 19905.5, 125594.5] Hz\n- **Peak Polarizations**: [0.123, 0.016, 0.137, 0.117, 0.095, 0.336]\n  - **Interpretation**: The DRT reveals multiple time constants, indicating multiple physical processes. The largest polarization (0.336) at 125.6 kHz suggests a dominant process at high frequency, likely related to charge transfer or double-layer effects. The lower-frequency peaks (29.5 Hz, 123 Hz, 250.5 Hz) may correspond to diffusion or interfacial processes.\n\n#### 5. **Lin-KK Analysis**\n- **Residuals**:\n  - Real residuals: Mean = 0.000456, Max = 0.001119\n  - Imaginary residuals: Mean = -0.000456, Max = 0.001119\n  - **Interpretation**: The residuals are small and randomly distributed, indicating good data quality and no systematic errors. The Lin-KK validation confirms the data is Kramers-Kronig consistent.\n\n#### 6. **ECM Fit Quality Metrics**\n- **Chi-Square**: 0.405\n- **AIC**: 359.434\n- **WRMS**: 0.00466\n  - **Interpretation**: The fit metrics are reasonable, but the poor path deviation overshadows these results. The model structure must be revised.\n\n---\n\n### Recommendations\n\n#### For ECM Fit:\n1. **Model Structure Revision**:\n   - The current model (Rs + Rct || Cdl) is insufficient. Consider adding elements to account for the multiple time constants observed in the DRT.\n   - Suggested additions:\n     - A Warburg element for diffusion processes (evident in low-frequency DRT peaks).\n     - A second RC element or CPE to capture distributed effects (evident in high-frequency DRT peaks).\n\n2. **Parameter Optimization**:\n   - Once the model structure is revised, re-optimize parameters to improve path following.\n\n#### For Non-ECM Analysis:\n1. **Data Quality**:\n   - The data is of high quality, as confirmed by Lin-KK validation. No measurement artifacts are evident.\n\n2. **Model Structure Suggestions**:\n   - Use the DRT peaks to guide model development. For example:\n     - Add a Warburg element for the low-frequency peaks.\n     - Use a CPE instead of a pure capacitor to account for distributed effects at high frequencies.\n\n3. **Physical Interpretation**:\n   - The dominant high-frequency process (125.6 kHz) is likely related to charge transfer or double-layer effects.\n   - The lower-frequency processes (29.5 Hz, 123 Hz, 250.5 Hz) may correspond to diffusion or interfacial phenomena.\n\n---\n\n### Final Remarks\n- The current ECM model is invalid due to poor path following. Structural changes are required.\n- The DRT provides valuable insights into the physical processes and should guide model improvement.\n- The data quality is excellent, as confirmed by Lin-KK validation.\n\n**NOTICE TO RESEARCHERS**: LLMs hallucinate. All analyses and recommendations are intended as guidance to be evaluated alongside physical understanding and domain expertise.",
   "recommendations": [],
   "overall_assessment": {}
 }
