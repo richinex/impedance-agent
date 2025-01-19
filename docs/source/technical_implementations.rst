@@ -9,7 +9,7 @@ Data Quality Assessment
 Lin-KK Analysis
 ~~~~~~~~~~~~~~~
 
-The Lin-KK validation uses the impedancepy package, implementing the method from Schönleber et al. [Schonleber2014]_. This implementation:
+The Lin-KK validation uses the impedancepy package, implementing the method from Schönleber et al. [1]_. This implementation:
 
 - Uses a Kramers-Kronig circuit model with ohmic resistor and RC elements
 - Finds the best number of RC elements automatically
@@ -124,7 +124,7 @@ Model Selection Metrics
 Akaike Information Criterion (AIC)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For different weighting schemes [Ingdal2019]_:
+For different weighting schemes [2]_:
 
 Unit weighting:
 
@@ -152,7 +152,7 @@ where:
 Distribution of Relaxation Times (DRT)
 --------------------------------------
 
-We use Kulikovsky's method [Kulikovsky2020]_ for DRT analysis, which:
+We use Kulikovsky's method [3]_ for DRT analysis, which:
 
 - Combines Tikhonov regularization with projected gradient method
 - Handles the ill-posed nature of DRT calculations
@@ -205,11 +205,11 @@ The LLM system is structured to prioritize analysis based on:
 References
 ----------
 
-.. [Schonleber2014] Schönleber, M., et al. (2014). A Method for Improving the Robustness of linear Kramers-Kronig Validity Tests. *Electrochimica Acta*, **131**, 20-27.
+.. [1] Schönleber, M., et al. (2014). A Method for Improving the Robustness of linear Kramers-Kronig Validity Tests. *Electrochimica Acta*, **131**, 20-27.
 
-.. [Ingdal2019] Ingdal, M., Johnsen, R., & Harrington, D. A. (2019). The Akaike information criterion in weighted regression of immittance data. *Electrochimica Acta*, **317**, 648-653.
+.. [2] Ingdal, M., Johnsen, R., & Harrington, D. A. (2019). The Akaike information criterion in weighted regression of immittance data. *Electrochimica Acta*, **317**, 648-653.
 
-.. [Kulikovsky2020] Kulikovsky, A. (2020). PEM fuel cell distribution of relaxation times: A method for calculation and behavior of oxygen transport peak. *Physical Chemistry Chemical Physics*, **19**, 19131.
+.. [3] Kulikovsky, A. (2020). PEM fuel cell distribution of relaxation times: A method for calculation and behavior of oxygen transport peak. *Physical Chemistry Chemical Physics*, **19**, 19131.
 
 Notes
 -----
