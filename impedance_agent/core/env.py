@@ -1,4 +1,4 @@
-# src/core/config.py
+# src/core/env.py
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -14,17 +14,30 @@ class APIConfig:
 
 
 class Environment:
-    def __init__(self):
-        # Try multiple locations for .env file
+    def __init__(self, config_dict: Optional[dict] = None, validate: bool = True):
+        """Initialize environment with optional config override for testing
+
+        Args:
+            config_dict: Optional configuration dictionary for testing
+            validate: Whether to validate the configuration (disable for testing)
+        """
+        if config_dict is None:
+            self._load_from_env()
+        else:
+            self._load_from_dict(config_dict)
+
+        if validate:
+            self._validate_configs()
+
+    def _load_from_env(self):
+        """Load configuration from environment variables"""
         possible_paths = [
             Path.cwd() / ".env",  # Current working directory
             Path(__file__).parent.parent / ".env",  # Package directory
             Path(__file__).parent.parent.parent / ".env",  # Project root
         ]
 
-        # Use the first .env file found
         env_path = next((path for path in possible_paths if path.exists()), None)
-
         if env_path:
             load_dotenv(env_path)
         else:
@@ -35,13 +48,12 @@ class Environment:
                     f"No .env file found. Please copy {example_path} to create your .env file."
                 )
 
-        # API Configurations
         self.deepseek = APIConfig(
             api_key=self._get_optional("DEEPSEEK_API_KEY", ""),
             base_url=self._get_optional(
                 "DEEPSEEK_API_BASE_URL", "https://api.deepseek.com"
             ),
-            model="deepseek-chat",
+            model=self._get_optional("DEEPSEEK_MODEL", "deepseek-chat"),
         )
 
         self.openai = APIConfig(
@@ -49,14 +61,26 @@ class Environment:
             base_url=self._get_optional(
                 "OPENAI_API_BASE_URL", "https://api.openai.com/v1"
             ),
-            model="gpt-4o-mini",
+            model=self._get_optional("OPENAI_MODEL", "gpt-4-mini"),
         )
 
-        # Other configurations
         self.log_level = self._get_optional("LOG_LEVEL", "INFO")
 
-        # Validate configurations
-        self._validate_configs()
+    def _load_from_dict(self, config: dict):
+        """Load configuration from dictionary (mainly for testing)"""
+        self.deepseek = APIConfig(
+            api_key=config.get("DEEPSEEK_API_KEY", ""),
+            base_url=config.get("DEEPSEEK_API_BASE_URL", "https://api.deepseek.com"),
+            model=config.get("DEEPSEEK_MODEL", "deepseek-chat"),
+        )
+
+        self.openai = APIConfig(
+            api_key=config.get("OPENAI_API_KEY", ""),
+            base_url=config.get("OPENAI_API_BASE_URL", "https://api.openai.com/v1"),
+            model=config.get("OPENAI_MODEL", "gpt-4-mini"),
+        )
+
+        self.log_level = config.get("LOG_LEVEL", "INFO")
 
     def _get_required(self, key: str) -> str:
         """
