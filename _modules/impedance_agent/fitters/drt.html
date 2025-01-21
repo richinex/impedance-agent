@@ -1,0 +1,750 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>impedance_agent.fitters.drt &mdash; Impedance Agent</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Impedance Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#requirements">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#installing-from-github">Installing from GitHub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../technical_implementations.html">Technical Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">impedance_agent</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Impedance Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">impedance_agent.fitters.drt</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for impedance_agent.fitters.drt</h1><div class="highlight"><pre>
+<span></span><span class="c1"># src/fitters/drt.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jaxopt</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProjectedGradient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jaxopt.projection</span><span class="w"> </span><span class="kn">import</span> <span class="n">projection_non_negative</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_peaks</span><span class="p">,</span> <span class="n">peak_widths</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">least_squares</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">DRTResult</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+
+<div class="viewcode-block" id="DRTFitter">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DRTFitter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Distribution of Relaxation Times (DRT) analysis for electrochemical impedance data.</span>
+
+<span class="sd">    This class implements the combined Tikhonov regularization and projected gradient</span>
+<span class="sd">    method for calculating DRT from impedance data as described in:</span>
+<span class="sd">    &quot;PEM fuel cell distribution of relaxation times: a method for the calculation</span>
+<span class="sd">    and behavior of an oxygen transport peak&quot;</span>
+
+<span class="sd">    The fundamental DRT equation relating impedance to the distribution function is:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        Z(\\omega) - R_\\infty = R_{pol}\\int_0^\\infty \\frac{\\gamma(\\tau)d\\tau}{1 + i\\omega\\tau}</span>
+
+<span class="sd">    With normalization condition:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \\int_0^\\infty \\gamma(\\tau)d\\tau = 1</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    zexp_re : np.ndarray</span>
+<span class="sd">        Real part of experimental impedance</span>
+<span class="sd">    zexp_im : np.ndarray</span>
+<span class="sd">        Imaginary part of experimental impedance</span>
+<span class="sd">    omg : np.ndarray</span>
+<span class="sd">        Angular frequencies</span>
+<span class="sd">    lam_t0 : float</span>
+<span class="sd">        Initial Tikhonov regularization parameter</span>
+<span class="sd">    lam_pg0 : float</span>
+<span class="sd">        Initial projected gradient parameter</span>
+<span class="sd">    lower_bounds : np.ndarray</span>
+<span class="sd">        Lower bounds for regularization parameters</span>
+<span class="sd">    upper_bounds : np.ndarray</span>
+<span class="sd">        Upper bounds for regularization parameters</span>
+<span class="sd">    mode : str, optional</span>
+<span class="sd">        &#39;real&#39; or &#39;imag&#39; for using real or imaginary part of impedance (default: &#39;real&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DRTFitter.__init__">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">zexp_re</span><span class="p">,</span>
+        <span class="n">zexp_im</span><span class="p">,</span>
+        <span class="n">omg</span><span class="p">,</span>
+        <span class="n">lam_t0</span><span class="p">,</span>
+        <span class="n">lam_pg0</span><span class="p">,</span>
+        <span class="n">lower_bounds</span><span class="p">,</span>
+        <span class="n">upper_bounds</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;real&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+        <span class="n">jax</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_enable_x64&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Calculate scale factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rpol</span> <span class="o">=</span> <span class="n">zexp_re</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">zexp_re</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rpol</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-10</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rpol</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Rpol near zero, using default value of 1.0&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Store normalized data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zexp_re</span> <span class="o">=</span> <span class="n">zexp_re</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zexp_im</span> <span class="o">=</span> <span class="n">zexp_im</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zexp_re_norm</span> <span class="o">=</span> <span class="n">zexp_re</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">rpol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zexp_im_norm</span> <span class="o">=</span> <span class="n">zexp_im</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">rpol</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">omg</span> <span class="o">=</span> <span class="n">omg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam_t0</span> <span class="o">=</span> <span class="n">lam_t0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam_pg0</span> <span class="o">=</span> <span class="n">lam_pg0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">lower_bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">upper_bounds</span>
+
+        <span class="c1"># Updated iteration settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">niter</span> <span class="o">=</span> <span class="mi">80</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flagiter</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Initialize arrays</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">omg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ln_tau</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_ln_tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_dmesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ln_tau</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_dmesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id_matrix</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">omg</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a_matrix</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">omg</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">omg</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initialized DRT fitter with mode=</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initial parameters: λT=</span><span class="si">{</span><span class="n">lam_t0</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">, λPG=</span><span class="si">{</span><span class="n">lam_pg0</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Build matrices and get initial guess</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_tikhonov_matrix</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gfun_init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tikh_solver</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lam_t0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_mat_t_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_rhs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_matrix</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DRTFitter.compute_normalized_residuals">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.compute_normalized_residuals">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_normalized_residuals</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">Z_fit</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute normalized residuals using impedance modulus for normalization.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            r_{real} = \\frac{Z_{fit,real} - Z_{exp,real}}{\\sqrt{Z_{exp,real}^2 + Z_{exp,imag}^2}}</span>
+
+<span class="sd">            r_{imag} = \\frac{Z_{fit,imag} - Z_{exp,imag}}{\\sqrt{Z_{exp,real}^2 + Z_{exp,imag}^2}}</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Z_fit : np.ndarray</span>
+<span class="sd">            Complex array containing the fitted impedance values</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[np.ndarray, np.ndarray]</span>
+<span class="sd">            Tuple containing:</span>
+<span class="sd">            - residuals_real: Normalized residuals of the real component</span>
+<span class="sd">            - residuals_imag: Normalized residuals of the imaginary component</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Z_mod</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zexp_re</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">zexp_im</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">residuals_real</span> <span class="o">=</span> <span class="p">(</span><span class="n">Z_fit</span><span class="o">.</span><span class="n">real</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">zexp_re</span><span class="p">)</span> <span class="o">/</span> <span class="n">Z_mod</span>
+        <span class="n">residuals_imag</span> <span class="o">=</span> <span class="p">(</span><span class="n">Z_fit</span><span class="o">.</span><span class="n">imag</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">zexp_im</span><span class="p">)</span> <span class="o">/</span> <span class="n">Z_mod</span>
+        <span class="k">return</span> <span class="n">residuals_real</span><span class="p">,</span> <span class="n">residuals_imag</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_dmesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a mesh spacing array for the given grid using central differences.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            dh_j = \\begin{cases}</span>
+<span class="sd">            0.5(grid_{j+1} - grid_{j-1}) &amp; \\text{for } j = 1,\\ldots,N-2 \\\\</span>
+<span class="sd">            0.5(grid_1 - grid_0) &amp; \\text{for } j = 0 \\\\</span>
+<span class="sd">            0.5(grid_{N-1} - grid_{N-2}) &amp; \\text{for } j = N-1</span>
+<span class="sd">            \\end{cases}</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        grid : np.ndarray</span>
+<span class="sd">            Array containing grid points</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Array containing mesh spacing values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dh</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">omg</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">omg</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">dh</span> <span class="o">=</span> <span class="n">dh</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">grid</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]))</span>
+        <span class="n">dh</span> <span class="o">=</span> <span class="n">dh</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">dh</span> <span class="o">=</span> <span class="n">dh</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">grid</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">dh</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_am_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">omega_value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a single row of the system matrix for a given frequency.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            A_{m,n} = \\begin{cases}</span>
+<span class="sd">            \\frac{d\\ln\\tau}{1 + (\\omega\\tau)^2} &amp; \\text{for real mode} \\\\</span>
+<span class="sd">            \\frac{\\omega\\tau d\\ln\\tau}{1 + (\\omega\\tau)^2} &amp; \\text{for imaginary mode}</span>
+<span class="sd">            \\end{cases}</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        omega_value : float</span>
+<span class="sd">            Angular frequency value</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Row of the system matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prod</span> <span class="o">=</span> <span class="n">omega_value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;real&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_ln_tau</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">prod</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">prod</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_ln_tau</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">prod</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_tikhonov_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds the system matrix A, the Tikhonov matrix A^T A + λT I, and RHS.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            A^TA\\vec{\\gamma} + \\lambda_T I\\vec{\\gamma} = A^T\\vec{b}</span>
+
+<span class="sd">        Where b is either Z&#39; or Z&#39;&#39; depending on mode.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Building Tikhonov matrix&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a_matrix</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">vmap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_am_row</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">omg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a_matrix_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_matrix</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a_mat_t_a</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_matrix_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_matrix</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a_tikh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_mat_t_a</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_t0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_matrix</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;real&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">b_rhs</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_matrix_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zexp_re_norm</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">b_rhs</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_matrix_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zexp_im_norm</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DRTFitter.tikh_solver">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.tikh_solver">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tikh_solver</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam_t</span><span class="p">,</span> <span class="n">a_mat_t_a</span><span class="p">,</span> <span class="n">b_rhs</span><span class="p">,</span> <span class="n">id_matrix</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Solve the Tikhonov-regularized equation using least squares.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            (A^TA + \\lambda_T I)\\vec{\\gamma} = A^T\\vec{b}</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lam_t : float</span>
+<span class="sd">            Tikhonov regularization parameter</span>
+<span class="sd">        a_mat_t_a : np.ndarray</span>
+<span class="sd">            A^T A matrix</span>
+<span class="sd">        b_rhs : np.ndarray</span>
+<span class="sd">            Right-hand side vector</span>
+<span class="sd">        id_matrix : np.ndarray</span>
+<span class="sd">            Identity matrix</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Solution vector γ</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lhs_matrix</span> <span class="o">=</span> <span class="n">a_mat_t_a</span> <span class="o">+</span> <span class="n">lam_t</span> <span class="o">*</span> <span class="n">id_matrix</span>
+        <span class="n">sol</span><span class="p">,</span> <span class="n">residuals</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">sv</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">lhs_matrix</span><span class="p">,</span> <span class="n">b_rhs</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sol</span></div>
+
+
+<div class="viewcode-block" id="DRTFitter.objective_function">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.objective_function">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">objective_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g_vector</span><span class="p">,</span> <span class="n">lhs_matrix</span><span class="p">,</span> <span class="n">b_rhs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Objective function for projected gradient optimization.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            f(\\vec{\\gamma}) = \\|(A^TA + \\lambda_T I)\\vec{\\gamma} - A^T\\vec{b}\\|^2</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        g_vector : np.ndarray</span>
+<span class="sd">            Current γ vector</span>
+<span class="sd">        lhs_matrix : np.ndarray</span>
+<span class="sd">            Left-hand side matrix</span>
+<span class="sd">        b_rhs : np.ndarray</span>
+<span class="sd">            Right-hand side vector</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Objective function value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">residuals</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">lhs_matrix</span><span class="p">,</span> <span class="n">g_vector</span><span class="p">)</span> <span class="o">-</span> <span class="n">b_rhs</span>
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">residuals</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DRTFitter.find_lambda">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.find_lambda">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_lambda</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scans over lambda_T range to find optimal regularization parameters.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]</span>
+<span class="sd">            - resid: Residual norms</span>
+<span class="sd">            - solnorm: Solution norms</span>
+<span class="sd">            - lam_t_arr: Tikhonov parameter values</span>
+<span class="sd">            - lam_pg_arr: Projected gradient parameter values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Scanning lambda parameter range&quot;</span><span class="p">)</span>
+        <span class="n">kmax</span><span class="p">,</span> <span class="n">lam_val</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span> <span class="mf">1e-25</span>
+        <span class="n">solnorm</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">kmax</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">resid</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">kmax</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">lam_t_arr</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">kmax</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">lam_pg_arr</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">kmax</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">kmax</span><span class="p">):</span>
+            <span class="n">lam_val</span> <span class="o">=</span> <span class="n">lam_val</span> <span class="o">*</span> <span class="mi">10</span>
+            <span class="n">lam_t_arr</span> <span class="o">=</span> <span class="n">lam_t_arr</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">lam_val</span><span class="p">)</span>
+            <span class="n">gfun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tikh_solver</span><span class="p">(</span><span class="n">lam_val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_mat_t_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_rhs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_matrix</span><span class="p">)</span>
+            <span class="n">resid</span> <span class="o">=</span> <span class="n">resid</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residual_norm</span><span class="p">(</span><span class="n">gfun</span><span class="p">))</span>
+            <span class="n">solnorm</span> <span class="o">=</span> <span class="n">solnorm</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">gfun</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+            <span class="n">lam_pg_arr</span> <span class="o">=</span> <span class="n">lam_pg_arr</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_tikh</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">resid</span><span class="p">,</span> <span class="n">solnorm</span><span class="p">,</span> <span class="n">lam_t_arr</span><span class="p">,</span> <span class="n">lam_pg_arr</span></div>
+
+
+<div class="viewcode-block" id="DRTFitter.residual_norm">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.residual_norm">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">residual_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g_vector</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the norm of the residual using (A^T A)g - A^T b.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        g_vector : np.ndarray</span>
+<span class="sd">            Current γ vector</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Residual norm</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lhs_prod</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_mat_t_a</span><span class="p">,</span> <span class="n">g_vector</span><span class="p">)</span>
+        <span class="n">norm_res</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">lhs_prod</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_rhs</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">norm_res</span></div>
+
+
+<div class="viewcode-block" id="DRTFitter.encode">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.encode">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts external parameters to internal parameters in log10 scale.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            p_{int} = \\log_{10}\\left(\\frac{p - lb}{1 - p/ub}\\right)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log10</span><span class="p">((</span><span class="n">p</span> <span class="o">-</span> <span class="n">lb</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p</span> <span class="o">/</span> <span class="n">ub</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="DRTFitter.decode">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.decode">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts internal parameters to external parameters.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            p_{ext} = \\frac{lb + 10^p}{1 + 10^p/ub}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">lb</span> <span class="o">+</span> <span class="mi">10</span><span class="o">**</span><span class="n">p</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">10</span><span class="o">**</span><span class="n">p</span> <span class="o">/</span> <span class="n">ub</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DRTFitter.jacobian_lsq">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.jacobian_lsq">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">jacobian_lsq</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pvec</span><span class="p">,</span> <span class="n">lhs_matrix</span><span class="p">,</span> <span class="n">a_mat_t_a</span><span class="p">,</span> <span class="n">b_rhs</span><span class="p">,</span> <span class="n">d_ln_tau</span><span class="p">,</span> <span class="n">id_matrix</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the Jacobian of the Tikhonov residual function.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tikh_residual</span><span class="p">)(</span>
+            <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pvec</span><span class="p">),</span> <span class="n">lhs_matrix</span><span class="p">,</span> <span class="n">a_mat_t_a</span><span class="p">,</span> <span class="n">b_rhs</span><span class="p">,</span> <span class="n">d_ln_tau</span><span class="p">,</span> <span class="n">id_matrix</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DRTFitter.pg_solver">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.pg_solver">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pg_solver</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lamvec</span><span class="p">,</span> <span class="n">lhs_matrix</span><span class="p">,</span> <span class="n">a_mat_t_a</span><span class="p">,</span> <span class="n">b_rhs</span><span class="p">,</span> <span class="n">d_ln_tau</span><span class="p">,</span> <span class="n">id_matrix</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Projected gradient solver using Tikhonov solution as initial guess.</span>
+
+<span class="sd">        Implements the iterations:</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \\vec{\\gamma}^{k+1} = P_+[\\vec{\\gamma}^k - \\lambda_{pg}((A^TA + \\lambda_TI)\\vec{\\gamma}^k - A^T\\vec{b})]</span>
+
+<span class="sd">        where P_+ is the projection onto non-negative orthant.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lam_t</span><span class="p">,</span> <span class="n">lam_pg</span> <span class="o">=</span> <span class="n">lamvec</span>
+        <span class="n">g_init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tikh_solver</span><span class="p">(</span><span class="n">lam_t</span><span class="p">,</span> <span class="n">a_mat_t_a</span><span class="p">,</span> <span class="n">b_rhs</span><span class="p">,</span> <span class="n">id_matrix</span><span class="p">)</span>
+        <span class="n">lhs_matrix_new</span> <span class="o">=</span> <span class="n">a_mat_t_a</span> <span class="o">+</span> <span class="n">lam_t</span> <span class="o">*</span> <span class="n">id_matrix</span>
+
+        <span class="n">pg</span> <span class="o">=</span> <span class="n">ProjectedGradient</span><span class="p">(</span>
+            <span class="n">fun</span><span class="o">=</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective_function</span><span class="p">),</span>
+            <span class="n">projection</span><span class="o">=</span><span class="n">projection_non_negative</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span>
+            <span class="n">maxiter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">niter</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">,</span>
+            <span class="n">implicit_diff</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">jit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Running projected gradient optimization&quot;</span><span class="p">)</span>
+        <span class="n">solution</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">init_params</span><span class="o">=</span><span class="n">g_init</span><span class="p">,</span> <span class="n">lhs_matrix</span><span class="o">=</span><span class="n">lhs_matrix_new</span><span class="p">,</span> <span class="n">b_rhs</span><span class="o">=</span><span class="n">b_rhs</span><span class="p">)</span>
+
+        <span class="n">r_poly</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">solution</span><span class="o">.</span><span class="n">params</span> <span class="o">*</span> <span class="n">d_ln_tau</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">solution</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">r_poly</span><span class="p">,</span> <span class="n">solution</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">iter_num</span></div>
+
+
+<div class="viewcode-block" id="DRTFitter.tikh_residual">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.tikh_residual">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tikh_residual</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">lamvec_log</span><span class="p">,</span> <span class="n">lhs_matrix</span><span class="p">,</span> <span class="n">a_mat_t_a</span><span class="p">,</span> <span class="n">b_rhs</span><span class="p">,</span> <span class="n">d_ln_tau</span><span class="p">,</span> <span class="n">id_matrix</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute Tikhonov residual for given regularization parameters.&quot;&quot;&quot;</span>
+        <span class="n">lamvec_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">lamvec_log</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">)</span>
+        <span class="n">g_vector</span><span class="p">,</span> <span class="n">rpoly</span><span class="p">,</span> <span class="n">iterations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pg_solver</span><span class="p">(</span>
+            <span class="n">lamvec_norm</span><span class="p">,</span> <span class="n">lhs_matrix</span><span class="p">,</span> <span class="n">a_mat_t_a</span><span class="p">,</span> <span class="n">b_rhs</span><span class="p">,</span> <span class="n">d_ln_tau</span><span class="p">,</span> <span class="n">id_matrix</span>
+        <span class="p">)</span>
+        <span class="n">resid</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_tikh</span><span class="p">,</span> <span class="n">g_vector</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_rhs</span>
+        <span class="k">return</span> <span class="n">resid</span></div>
+
+
+<div class="viewcode-block" id="DRTFitter.rpol_peaks">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.rpol_peaks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rpol_peaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g_vector</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find peaks in the DRT spectrum and calculate their parameters.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        g_vector : np.ndarray</span>
+<span class="sd">            DRT solution vector</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Array containing peak parameters (frequencies and polarizations)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Analyzing DRT peaks&quot;</span><span class="p">)</span>
+        <span class="n">g_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">g_vector</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">peaks</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span><span class="n">g_np</span><span class="p">,</span> <span class="n">prominence</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+        <span class="n">widths</span> <span class="o">=</span> <span class="n">peak_widths</span><span class="p">(</span><span class="n">g_np</span><span class="p">,</span> <span class="n">peaks</span><span class="p">,</span> <span class="n">rel_height</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">integrals</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">peaks</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">peaks</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="n">low_bound</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">n</span><span class="p">])</span>
+            <span class="n">up_bound</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="n">n</span><span class="p">])</span>
+            <span class="n">integrals</span> <span class="o">=</span> <span class="n">integrals</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="n">g_vector</span><span class="p">[</span><span class="n">low_bound</span><span class="p">:</span><span class="n">up_bound</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_ln_tau</span><span class="p">[</span><span class="n">low_bound</span><span class="p">:</span><span class="n">up_bound</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">peak_params</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">peaks</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">peak_params</span> <span class="o">=</span> <span class="n">peak_params</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="n">jnp</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">[</span><span class="n">peaks</span><span class="p">]))</span>
+        <span class="p">)</span>
+        <span class="n">peak_params</span> <span class="o">=</span> <span class="n">peak_params</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">integrals</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">peak_params</span></div>
+
+
+<div class="viewcode-block" id="DRTFitter.z_model_imre">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.z_model_imre">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_model_imre</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g_vector</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the model impedance from the DRT solution.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            Z(\\omega) = R_{pol}\\int_0^\\infty \\frac{\\gamma(\\tau)}{1 + i\\omega\\tau}d\\tau</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">z_mod</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">omg</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">omg</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="n">prod</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">omg</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;real&quot;</span><span class="p">:</span>
+                <span class="n">integrand</span> <span class="o">=</span> <span class="n">g_vector</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">prod</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">integrand</span> <span class="o">=</span> <span class="n">prod</span> <span class="o">*</span> <span class="n">g_vector</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">prod</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">z_mod</span> <span class="o">=</span> <span class="n">z_mod</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_ln_tau</span> <span class="o">*</span> <span class="n">integrand</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rpol</span> <span class="o">*</span> <span class="n">z_mod</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DRTFitter.fit">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DRTResult</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform the complete DRT fitting process.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Optional[DRTResult]</span>
+<span class="sd">            Complete DRT analysis results or None if fitting fails</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        1. Finds optimal regularization parameters</span>
+<span class="sd">        2. Performs Tikhonov regularization with projected gradient</span>
+<span class="sd">        3. Analyzes peaks in the DRT spectrum</span>
+<span class="sd">        4. Calculates fitted impedance and residuals</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting DRT analysis&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Find optimal lambda parameters</span>
+            <span class="n">resid</span><span class="p">,</span> <span class="n">solnorm</span><span class="p">,</span> <span class="n">arr_lam_t</span><span class="p">,</span> <span class="n">arr_lam_pg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_lambda</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Completed lambda parameter search&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Prepare for least squares</span>
+            <span class="n">lamvec_init</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_t0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_pg0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="n">lamvec_init_log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+                <span class="n">lamvec_init</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Perform optimization</span>
+            <span class="n">res_parm</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span>
+                <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tikh_residual</span><span class="p">),</span>
+                <span class="n">lamvec_init_log</span><span class="p">,</span>
+                <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lm&quot;</span><span class="p">,</span>
+                <span class="n">jac</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jacobian_lsq</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">a_tikh</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">a_mat_t_a</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">b_rhs</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">d_ln_tau</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">id_matrix</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+
+            <span class="n">final_lamvec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">res_parm</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Final parameters: λT=</span><span class="si">{</span><span class="n">final_lamvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">, λPG=</span><span class="si">{</span><span class="n">final_lamvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Get final DRT distribution</span>
+            <span class="n">gfun_final</span><span class="p">,</span> <span class="n">rpoly</span><span class="p">,</span> <span class="n">n_iters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pg_solver</span><span class="p">(</span>
+                <span class="n">final_lamvec</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a_tikh</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a_mat_t_a</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">b_rhs</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">d_ln_tau</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">id_matrix</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed projected gradient in </span><span class="si">{</span><span class="n">n_iters</span><span class="si">}</span><span class="s2"> iterations&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rpol = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rpol</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">, Final rpoly = </span><span class="si">{</span><span class="n">rpoly</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Calculate residuals</span>
+            <span class="n">res_init</span><span class="p">,</span> <span class="n">lhs_init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tikh_residual_norm</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gfun_init</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_t0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_mat_t_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_rhs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_matrix</span>
+            <span class="p">)</span>
+            <span class="n">res_fin</span><span class="p">,</span> <span class="n">lhs_fin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tikh_residual_norm</span><span class="p">(</span>
+                <span class="n">gfun_final</span><span class="p">,</span> <span class="n">final_lamvec</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_mat_t_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_rhs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_matrix</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Residuals: initial = </span><span class="si">{</span><span class="n">res_init</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2">, final = </span><span class="si">{</span><span class="n">res_fin</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">res_parm</span><span class="o">.</span><span class="n">status</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Optimization successful: </span><span class="si">{</span><span class="n">res_parm</span><span class="o">.</span><span class="n">njev</span><span class="si">}</span><span class="s2"> Jacobian evaluations&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flagiter</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Maximum iteration limit reached in projected gradient&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Find peaks</span>
+            <span class="n">peak_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rpol_peaks</span><span class="p">(</span><span class="n">gfun_final</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">peak_params</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">peak_freqs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">peak_params</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">peak_pols</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">peak_params</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Identified DRT peaks:&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">peak_freqs</span><span class="p">,</span> <span class="n">peak_pols</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  f = </span><span class="si">{</span><span class="n">f</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> Hz, polarization = </span><span class="si">{</span><span class="n">p</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No peaks detected in DRT spectrum&quot;</span><span class="p">)</span>
+                <span class="n">peak_freqs</span><span class="p">,</span> <span class="n">peak_pols</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+
+            <span class="c1"># Convert JAX arrays to numpy arrays</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
+            <span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">gfun_final</span><span class="p">)</span>
+
+            <span class="c1"># Calculate model impedance</span>
+            <span class="n">Z_fit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_model_imre</span><span class="p">(</span><span class="n">gfun_final</span><span class="p">)</span>
+            <span class="n">Z_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Z_fit</span><span class="p">)</span>  <span class="c1"># Convert to numpy array</span>
+
+            <span class="c1"># Calculate normalized residuals</span>
+            <span class="n">residuals_real</span><span class="p">,</span> <span class="n">residuals_imag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_normalized_residuals</span><span class="p">(</span><span class="n">Z_fit</span><span class="p">)</span>
+
+            <span class="c1"># Validate results</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">gamma</span><span class="p">))</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">gamma</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid values detected in final DRT solution&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Create result object</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">DRTResult</span><span class="p">(</span>
+                <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span>
+                <span class="n">gamma</span><span class="o">=</span><span class="n">gamma</span><span class="p">,</span>
+                <span class="n">peak_frequencies</span><span class="o">=</span><span class="n">peak_freqs</span><span class="p">,</span>
+                <span class="n">peak_polarizations</span><span class="o">=</span><span class="n">peak_pols</span><span class="p">,</span>
+                <span class="n">regularization_param</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">final_lamvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="n">residual</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">rpoly</span><span class="p">),</span>
+                <span class="n">Z_fit</span><span class="o">=</span><span class="n">Z_fit</span><span class="p">,</span>
+                <span class="n">residuals_real</span><span class="o">=</span><span class="n">residuals_real</span><span class="p">,</span>
+                <span class="n">residuals_imag</span><span class="o">=</span><span class="n">residuals_imag</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created DRTResult object with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_freqs</span><span class="p">)</span><span class="si">}</span><span class="s2"> peaks&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;DRT fitting failed&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="DRTFitter.tikh_residual_norm">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.drt.DRTFitter.tikh_residual_norm">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tikh_residual_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g_vector</span><span class="p">,</span> <span class="n">lam_t</span><span class="p">,</span> <span class="n">a_mat_t_a</span><span class="p">,</span> <span class="n">b_rhs</span><span class="p">,</span> <span class="n">id_matrix</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute norm of Tikhonov residual and LHS norm.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \\|res\\| = \\|(A^TA + \\lambda_T I)\\vec{\\gamma} - A^T\\vec{b}\\|</span>
+
+<span class="sd">            \\|lhs\\| = \\|(A^TA + \\lambda_T I)\\vec{\\gamma}\\|</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        g_vector : np.ndarray</span>
+<span class="sd">            Current γ vector</span>
+<span class="sd">        lam_t : float</span>
+<span class="sd">            Tikhonov regularization parameter</span>
+<span class="sd">        a_mat_t_a : np.ndarray</span>
+<span class="sd">            A^T A matrix</span>
+<span class="sd">        b_rhs : np.ndarray</span>
+<span class="sd">            Right-hand side vector</span>
+<span class="sd">        id_matrix : np.ndarray</span>
+<span class="sd">            Identity matrix</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[float, float]</span>
+<span class="sd">            Residual norm and LHS norm</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lhs_matrix</span> <span class="o">=</span> <span class="n">a_mat_t_a</span> <span class="o">+</span> <span class="n">lam_t</span> <span class="o">*</span> <span class="n">id_matrix</span>
+        <span class="n">lhs_prod</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">lhs_matrix</span><span class="p">,</span> <span class="n">g_vector</span><span class="p">)</span>
+        <span class="n">sum_res</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">lhs_prod</span> <span class="o">-</span> <span class="n">b_rhs</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">sum_lhs</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">lhs_prod</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">sum_res</span><span class="p">,</span> <span class="n">sum_lhs</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Richard Chukwu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

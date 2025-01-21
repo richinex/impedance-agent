@@ -1,0 +1,647 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>impedance_agent.fitters package &mdash; Impedance Agent</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="impedance_agent.core package" href="impedance_agent.core.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Impedance Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#installing-from-github">Installing from GitHub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="technical_implementations.html">Technical Implementations</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">impedance_agent</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="impedance_agent.html">impedance_agent package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="impedance_agent.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="impedance_agent.agent.html">impedance_agent.agent package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="impedance_agent.cli.html">impedance_agent.cli package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="impedance_agent.core.html">impedance_agent.core package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">impedance_agent.fitters package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Impedance Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">impedance_agent</a></li>
+          <li class="breadcrumb-item"><a href="impedance_agent.html">impedance_agent package</a></li>
+      <li class="breadcrumb-item active">impedance_agent.fitters package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/impedance_agent.fitters.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-impedance_agent.fitters">
+<span id="impedance-agent-fitters-package"></span><h1>impedance_agent.fitters package<a class="headerlink" href="#module-impedance_agent.fitters" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-impedance_agent.fitters.drt">
+<span id="impedance-agent-fitters-drt-module"></span><h2>impedance_agent.fitters.drt module<a class="headerlink" href="#module-impedance_agent.fitters.drt" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DRTFitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zexp_re</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zexp_im</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam_t0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam_pg0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'real'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Distribution of Relaxation Times (DRT) analysis for electrochemical impedance data.</p>
+<p>This class implements the combined Tikhonov regularization and projected gradient
+method for calculating DRT from impedance data as described in:
+“PEM fuel cell distribution of relaxation times: a method for the calculation
+and behavior of an oxygen transport peak”</p>
+<p>The fundamental DRT equation relating impedance to the distribution function is:</p>
+<div class="math notranslate nohighlight">
+\[Z(\omega) - R_\infty = R_{pol}\int_0^\infty \frac{\gamma(\tau)d\tau}{1 + i\omega\tau}\]</div>
+<p>With normalization condition:</p>
+<div class="math notranslate nohighlight">
+\[\int_0^\infty \gamma(\tau)d\tau = 1\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>zexp_re</strong> (<em>np.ndarray</em>) – Real part of experimental impedance</p></li>
+<li><p><strong>zexp_im</strong> (<em>np.ndarray</em>) – Imaginary part of experimental impedance</p></li>
+<li><p><strong>omg</strong> (<em>np.ndarray</em>) – Angular frequencies</p></li>
+<li><p><strong>lam_t0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Initial Tikhonov regularization parameter</p></li>
+<li><p><strong>lam_pg0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Initial projected gradient parameter</p></li>
+<li><p><strong>lower_bounds</strong> (<em>np.ndarray</em>) – Lower bounds for regularization parameters</p></li>
+<li><p><strong>upper_bounds</strong> (<em>np.ndarray</em>) – Upper bounds for regularization parameters</p></li>
+<li><p><strong>mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – ‘real’ or ‘imag’ for using real or imaginary part of impedance (default: ‘real’)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zexp_re</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zexp_im</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam_t0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam_pg0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'real'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.compute_normalized_residuals">
+<span class="sig-name descname"><span class="pre">compute_normalized_residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Z_fit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.compute_normalized_residuals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.compute_normalized_residuals" title="Link to this definition"></a></dt>
+<dd><p>Compute normalized residuals using impedance modulus for normalization.</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}r_{real} = \frac{Z_{fit,real} - Z_{exp,real}}{\sqrt{Z_{exp,real}^2 + Z_{exp,imag}^2}}\\r_{imag} = \frac{Z_{fit,imag} - Z_{exp,imag}}{\sqrt{Z_{exp,real}^2 + Z_{exp,imag}^2}}\end{aligned}\end{align} \]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Z_fit</strong> (<em>np.ndarray</em>) – Complex array containing the fitted impedance values</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple containing:
+- residuals_real: Normalized residuals of the real component
+- residuals_imag: Normalized residuals of the imaginary component</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[np.ndarray, np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.tikh_solver">
+<span class="sig-name descname"><span class="pre">tikh_solver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lam_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_mat_t_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_rhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_matrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.tikh_solver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.tikh_solver" title="Link to this definition"></a></dt>
+<dd><p>Solve the Tikhonov-regularized equation using least squares.</p>
+<div class="math notranslate nohighlight">
+\[(A^TA + \lambda_T I)\vec{\gamma} = A^T\vec{b}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lam_t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Tikhonov regularization parameter</p></li>
+<li><p><strong>a_mat_t_a</strong> (<em>np.ndarray</em>) – A^T A matrix</p></li>
+<li><p><strong>b_rhs</strong> (<em>np.ndarray</em>) – Right-hand side vector</p></li>
+<li><p><strong>id_matrix</strong> (<em>np.ndarray</em>) – Identity matrix</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Solution vector γ</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.objective_function">
+<span class="sig-name descname"><span class="pre">objective_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g_vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lhs_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_rhs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.objective_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.objective_function" title="Link to this definition"></a></dt>
+<dd><p>Objective function for projected gradient optimization.</p>
+<div class="math notranslate nohighlight">
+\[f(\vec{\gamma}) = \|(A^TA + \lambda_T I)\vec{\gamma} - A^T\vec{b}\|^2\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>g_vector</strong> (<em>np.ndarray</em>) – Current γ vector</p></li>
+<li><p><strong>lhs_matrix</strong> (<em>np.ndarray</em>) – Left-hand side matrix</p></li>
+<li><p><strong>b_rhs</strong> (<em>np.ndarray</em>) – Right-hand side vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Objective function value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.find_lambda">
+<span class="sig-name descname"><span class="pre">find_lambda</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.find_lambda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.find_lambda" title="Link to this definition"></a></dt>
+<dd><p>Scans over lambda_T range to find optimal regularization parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>resid: Residual norms</p></li>
+<li><p>solnorm: Solution norms</p></li>
+<li><p>lam_t_arr: Tikhonov parameter values</p></li>
+<li><p>lam_pg_arr: Projected gradient parameter values</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.residual_norm">
+<span class="sig-name descname"><span class="pre">residual_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g_vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.residual_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.residual_norm" title="Link to this definition"></a></dt>
+<dd><p>Calculate the norm of the residual using (A^T A)g - A^T b.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>g_vector</strong> (<em>np.ndarray</em>) – Current γ vector</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Residual norm</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.encode" title="Link to this definition"></a></dt>
+<dd><p>Converts external parameters to internal parameters in log10 scale.</p>
+<div class="math notranslate nohighlight">
+\[p_{int} = \log_{10}\left(\frac{p - lb}{1 - p/ub}\right)\]</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.decode" title="Link to this definition"></a></dt>
+<dd><p>Converts internal parameters to external parameters.</p>
+<div class="math notranslate nohighlight">
+\[p_{ext} = \frac{lb + 10^p}{1 + 10^p/ub}\]</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.jacobian_lsq">
+<span class="sig-name descname"><span class="pre">jacobian_lsq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pvec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lhs_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_mat_t_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_rhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_ln_tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.jacobian_lsq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.jacobian_lsq" title="Link to this definition"></a></dt>
+<dd><p>Compute the Jacobian of the Tikhonov residual function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.pg_solver">
+<span class="sig-name descname"><span class="pre">pg_solver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lamvec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lhs_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_mat_t_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_rhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_ln_tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_matrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.pg_solver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.pg_solver" title="Link to this definition"></a></dt>
+<dd><p>Projected gradient solver using Tikhonov solution as initial guess.</p>
+<p>Implements the iterations:</p>
+<div class="math notranslate nohighlight">
+\[\vec{\gamma}^{k+1} = P_+[\vec{\gamma}^k - \lambda_{pg}((A^TA + \lambda_TI)\vec{\gamma}^k - A^T\vec{b})]\]</div>
+<p>where P_+ is the projection onto non-negative orthant.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.tikh_residual">
+<span class="sig-name descname"><span class="pre">tikh_residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lamvec_log</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lhs_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_mat_t_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_rhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_ln_tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.tikh_residual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.tikh_residual" title="Link to this definition"></a></dt>
+<dd><p>Compute Tikhonov residual for given regularization parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.rpol_peaks">
+<span class="sig-name descname"><span class="pre">rpol_peaks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g_vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.rpol_peaks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.rpol_peaks" title="Link to this definition"></a></dt>
+<dd><p>Find peaks in the DRT spectrum and calculate their parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>g_vector</strong> (<em>np.ndarray</em>) – DRT solution vector</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array containing peak parameters (frequencies and polarizations)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.z_model_imre">
+<span class="sig-name descname"><span class="pre">z_model_imre</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g_vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.z_model_imre"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.z_model_imre" title="Link to this definition"></a></dt>
+<dd><p>Calculate the model impedance from the DRT solution.</p>
+<div class="math notranslate nohighlight">
+\[Z(\omega) = R_{pol}\int_0^\infty \frac{\gamma(\tau)}{1 + i\omega\tau}d\tau\]</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="impedance_agent.core.html#impedance_agent.core.models.DRTResult" title="impedance_agent.core.models.DRTResult"><span class="pre">DRTResult</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.fit" title="Link to this definition"></a></dt>
+<dd><p>Perform the complete DRT fitting process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Complete DRT analysis results or None if fitting fails</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Optional[<a class="reference internal" href="impedance_agent.core.html#impedance_agent.core.models.DRTResult" title="impedance_agent.core.models.DRTResult">DRTResult</a>]</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li><p>Finds optimal regularization parameters</p></li>
+<li><p>Performs Tikhonov regularization with projected gradient</p></li>
+<li><p>Analyzes peaks in the DRT spectrum</p></li>
+<li><p>Calculates fitted impedance and residuals</p></li>
+</ol>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.drt.DRTFitter.tikh_residual_norm">
+<span class="sig-name descname"><span class="pre">tikh_residual_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g_vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_mat_t_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_rhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_matrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/drt.html#DRTFitter.tikh_residual_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.drt.DRTFitter.tikh_residual_norm" title="Link to this definition"></a></dt>
+<dd><p>Compute norm of Tikhonov residual and LHS norm.</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\|res\| = \|(A^TA + \lambda_T I)\vec{\gamma} - A^T\vec{b}\|\\\|lhs\| = \|(A^TA + \lambda_T I)\vec{\gamma}\|\end{aligned}\end{align} \]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>g_vector</strong> (<em>np.ndarray</em>) – Current γ vector</p></li>
+<li><p><strong>lam_t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Tikhonov regularization parameter</p></li>
+<li><p><strong>a_mat_t_a</strong> (<em>np.ndarray</em>) – A^T A matrix</p></li>
+<li><p><strong>b_rhs</strong> (<em>np.ndarray</em>) – Right-hand side vector</p></li>
+<li><p><strong>id_matrix</strong> (<em>np.ndarray</em>) – Identity matrix</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Residual norm and LHS norm</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-impedance_agent.fitters.ecm">
+<span id="impedance-agent-fitters-ecm-module"></span><h2>impedance_agent.fitters.ecm module<a class="headerlink" href="#module-impedance_agent.fitters.ecm" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="impedance_agent.fitters.ecm.ECMFitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ECMFitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impedance_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="impedance_agent.core.html#impedance_agent.core.models.ImpedanceData" title="impedance_agent.core.models.ImpedanceData"><span class="pre">ImpedanceData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weighting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'modulus'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/ecm.html#ECMFitter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.ecm.ECMFitter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Equivalent Circuit Model (ECM) fitting for electrochemical impedance data.</p>
+<p>This class implements least squares optimization with bounded parameters for fitting
+equivalent circuit models to impedance data. The fitting process uses weighted residuals
+and supports different weighting schemes.</p>
+<p>The fundamental equation for the weighted sum of squared residuals is:</p>
+<div class="math notranslate nohighlight">
+\[WRSS = \sum_{i=1}^N \frac{(Z_{\mathrm{exp},i} - Z_{\mathrm{model},i})^2}{\sigma_i^2}\]</div>
+<p>Supported weighting schemes:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\sigma_i = \begin{cases}
+1 &amp; \text{for unit weighting} \\
+|Z_{\mathrm{exp},i}| &amp; \text{for proportional weighting} \\
+\sqrt{(\mathrm{Re}(Z_{\mathrm{exp},i}))^2 + (\mathrm{Im}(Z_{\mathrm{exp},i}))^2} &amp; \text{for modulus weighting}
+\end{cases}\end{split}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_func</strong> (<em>callable</em>) – Function that takes parameters and frequencies and returns impedance</p></li>
+<li><p><strong>p0</strong> (<em>array_like</em>) – Initial parameter values</p></li>
+<li><p><strong>freq</strong> (<em>array_like</em>) – Frequency values</p></li>
+<li><p><strong>impedance_data</strong> (<a class="reference internal" href="impedance_agent.core.html#impedance_agent.core.models.ImpedanceData" title="impedance_agent.core.models.ImpedanceData"><em>ImpedanceData</em></a>) – Object containing experimental impedance data</p></li>
+<li><p><strong>lb</strong> (<em>array_like</em>) – Lower bounds for parameters</p></li>
+<li><p><strong>ub</strong> (<em>array_like</em>) – Upper bounds for parameters</p></li>
+<li><p><strong>param_info</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – List of dictionaries containing parameter information</p></li>
+<li><p><strong>weighting</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Weighting scheme (‘unit’, ‘proportional’, ‘modulus’) or custom weights (default: ‘modulus’)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.ecm.ECMFitter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impedance_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="impedance_agent.core.html#impedance_agent.core.models.ImpedanceData" title="impedance_agent.core.models.ImpedanceData"><span class="pre">ImpedanceData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weighting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'modulus'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/ecm.html#ECMFitter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.ecm.ECMFitter.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize ECM fitter with model and data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_func</strong> (<em>callable</em>) – Function that takes parameters and frequencies and returns impedance</p></li>
+<li><p><strong>p0</strong> (<em>array_like</em>) – Initial parameter values</p></li>
+<li><p><strong>freq</strong> (<em>array_like</em>) – Frequency values</p></li>
+<li><p><strong>impedance_data</strong> (<a class="reference internal" href="impedance_agent.core.html#impedance_agent.core.models.ImpedanceData" title="impedance_agent.core.models.ImpedanceData"><em>ImpedanceData</em></a>) – Object containing experimental impedance data</p></li>
+<li><p><strong>lb</strong> (<em>array_like</em>) – Lower bounds for parameters</p></li>
+<li><p><strong>ub</strong> (<em>array_like</em>) – Upper bounds for parameters</p></li>
+<li><p><strong>param_info</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – List of dictionaries containing parameter information</p></li>
+<li><p><strong>weighting</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Weighting scheme (‘unit’, ‘proportional’, ‘modulus’) or custom weights (default: ‘modulus’)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.ecm.ECMFitter.compute_normalized_residuals">
+<span class="sig-name descname"><span class="pre">compute_normalized_residuals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Z_fit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/impedance_agent/fitters/ecm.html#ECMFitter.compute_normalized_residuals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.ecm.ECMFitter.compute_normalized_residuals" title="Link to this definition"></a></dt>
+<dd><p>Compute normalized residuals using impedance modulus for normalization.</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}r_{real} = \frac{Z_{fit,real} - Z_{exp,real}}{\sqrt{Z_{exp,real}^2 + Z_{exp,imag}^2}}\\r_{imag} = \frac{Z_{fit,imag} - Z_{exp,imag}}{\sqrt{Z_{exp,real}^2 + Z_{exp,imag}^2}}\end{aligned}\end{align} \]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Z_fit</strong> (<em>np.ndarray</em>) – Complex array containing the fitted impedance values</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple containing:
+- residuals_real: Normalized residuals of the real component
+- residuals_imag: Normalized residuals of the imaginary component</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[np.ndarray, np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.ecm.ECMFitter.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Array</span></span></span><a class="reference internal" href="_modules/impedance_agent/fitters/ecm.html#ECMFitter.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.ecm.ECMFitter.encode" title="Link to this definition"></a></dt>
+<dd><p>Convert external parameters to internal parameters using log-transform.</p>
+<div class="math notranslate nohighlight">
+\[p_{int} = \log_{10}\left(\frac{p - lb}{1 - p/ub}\right)\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>jnp.ndarray</em>) – External parameters</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Internal parameters</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>jnp.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.ecm.ECMFitter.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Array</span></span></span><a class="reference internal" href="_modules/impedance_agent/fitters/ecm.html#ECMFitter.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.ecm.ECMFitter.decode" title="Link to this definition"></a></dt>
+<dd><p>Convert internal parameters to external parameters.</p>
+<div class="math notranslate nohighlight">
+\[p_{ext} = \frac{lb + 10^p}{1 + 10^p/ub}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>jnp.ndarray</em>) – Internal parameters</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>External parameters</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>jnp.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.ecm.ECMFitter.obj_fun">
+<span class="sig-name descname"><span class="pre">obj_fun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/impedance_agent/fitters/ecm.html#ECMFitter.obj_fun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.ecm.ECMFitter.obj_fun" title="Link to this definition"></a></dt>
+<dd><p>Calculate weighted objective function.</p>
+<div class="math notranslate nohighlight">
+\[WRSS = \sum_{i=1}^N \frac{(Z_{exp,i} - Z_{model,i})^2}{\sigma_i^2}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p_log</strong> (<em>jnp.ndarray</em>) – Parameters in log space</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Weighted residual sum of squares</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.ecm.ECMFitter.compute_aic">
+<span class="sig-name descname"><span class="pre">compute_aic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wrss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/impedance_agent/fitters/ecm.html#ECMFitter.compute_aic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.ecm.ECMFitter.compute_aic" title="Link to this definition"></a></dt>
+<dd><p>Compute Akaike Information Criterion (AIC) for model selection.</p>
+<p>For unit weighting:</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{AIC} = 2N\ln(2\pi) - 2N\ln(2N) + 2N + 2N\ln(\mathrm{WRSS}) + 2k\]</div>
+<p>For modulus/proportional weighting:</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{AIC} = 2N\ln(2\pi) - 2N\ln(2N) + 2N - \sum\ln(w_i) + 2N\ln(\mathrm{WRSS}) + 2(k+1)\]</div>
+<p>For sigma weighting:</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{AIC} = 2N\ln(2\pi) + \sum\ln(\sigma_i^2) + \mathrm{WRSS} + 2k\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>wrss</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Weighted residual sum of squares</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Computed AIC value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.ecm.ECMFitter.calculate_fitted_impedance">
+<span class="sig-name descname"><span class="pre">calculate_fitted_impedance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Array</span></span></span><a class="reference internal" href="_modules/impedance_agent/fitters/ecm.html#ECMFitter.calculate_fitted_impedance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.ecm.ECMFitter.calculate_fitted_impedance" title="Link to this definition"></a></dt>
+<dd><p>Calculate fitted impedance values from parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parameters</strong> (<em>jnp.ndarray</em>) – Model parameters</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Complex array of fitted impedance values</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>jnp.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.ecm.ECMFitter.compute_fit_quality_metrics">
+<span class="sig-name descname"><span class="pre">compute_fit_quality_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Z_fit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="impedance_agent.core.html#impedance_agent.core.models.FitQualityMetrics" title="impedance_agent.core.models.FitQualityMetrics"><span class="pre">FitQualityMetrics</span></a></span></span><a class="reference internal" href="_modules/impedance_agent/fitters/ecm.html#ECMFitter.compute_fit_quality_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.ecm.ECMFitter.compute_fit_quality_metrics" title="Link to this definition"></a></dt>
+<dd><p>Compute fit quality using vector difference and path deviation metrics.</p>
+<p>The vector difference analysis quantifies the point-by-point agreement:</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{VD} = \frac{1}{N}\sum_{i=1}^N \frac{|Z_{\mathrm{fit},i} - Z_{\mathrm{exp},i}|}{|Z_{\mathrm{exp},i}|}\]</div>
+<p>The path deviation analysis quantifies trajectory agreement:</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{PD} = \frac{1}{N-1}\sum_{i=1}^{N-1} \left|\frac{\Delta Z_{\mathrm{fit},i}}{|\Delta Z_{\mathrm{fit},i}|} -
+\frac{\Delta Z_{\mathrm{exp},i}}{|\Delta Z_{\mathrm{exp},i}|}\right|\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Z_fit</strong> (<em>np.ndarray</em>) – Complex fitted impedance array</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Computed quality metrics including vector difference, path deviation,
+and overall quality assessment</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="impedance_agent.core.html#impedance_agent.core.models.FitQualityMetrics" title="impedance_agent.core.models.FitQualityMetrics">FitQualityMetrics</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.ecm.ECMFitter.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="impedance_agent.core.html#impedance_agent.core.models.FitResult" title="impedance_agent.core.models.FitResult"><span class="pre">FitResult</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/impedance_agent/fitters/ecm.html#ECMFitter.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.ecm.ECMFitter.fit" title="Link to this definition"></a></dt>
+<dd><p>Perform impedance fitting on the data.</p>
+<p>The fitting process involves:
+1. Parameter optimization using BFGS algorithm
+2. Uncertainty calculation via QR decomposition
+3. Computation of fit quality metrics
+4. Calculation of correlation matrix
+5. Model selection metrics (AIC)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Complete fitting results including:
+- Optimized parameters and uncertainties
+- Correlation matrix
+- Goodness-of-fit metrics (χ², AIC, WRMS)
+- Fitted impedance values
+- Fit quality assessment
+Returns None if fitting fails</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Optional[<a class="reference internal" href="impedance_agent.core.html#impedance_agent.core.models.FitResult" title="impedance_agent.core.models.FitResult">FitResult</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-impedance_agent.fitters.linkk">
+<span id="impedance-agent-fitters-linkk-module"></span><h2>impedance_agent.fitters.linkk module<a class="headerlink" href="#module-impedance_agent.fitters.linkk" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="impedance_agent.fitters.linkk.LinKKFitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LinKKFitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="impedance_agent.core.html#impedance_agent.core.models.ImpedanceData" title="impedance_agent.core.models.ImpedanceData"><span class="pre">ImpedanceData</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/linkk.html#LinKKFitter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.linkk.LinKKFitter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.linkk.LinKKFitter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="impedance_agent.core.html#impedance_agent.core.models.ImpedanceData" title="impedance_agent.core.models.ImpedanceData"><span class="pre">ImpedanceData</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/impedance_agent/fitters/linkk.html#LinKKFitter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.linkk.LinKKFitter.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impedance_agent.fitters.linkk.LinKKFitter.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.85</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_M</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="impedance_agent.core.html#impedance_agent.core.models.LinKKResult" title="impedance_agent.core.models.LinKKResult"><span class="pre">LinKKResult</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/impedance_agent/fitters/linkk.html#LinKKFitter.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#impedance_agent.fitters.linkk.LinKKFitter.fit" title="Link to this definition"></a></dt>
+<dd><p>Perform Lin-KK analysis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c</strong> – cutoff ratio for determining optimal number of RC elements</p></li>
+<li><p><strong>max_M</strong> – maximum number of RC elements to try</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>LinKKResult object containing fit results</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="impedance_agent.core.html" class="btn btn-neutral float-left" title="impedance_agent.core package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Richard Chukwu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

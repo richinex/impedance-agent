@@ -1,0 +1,266 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>impedance_agent.core.models &mdash; Impedance Agent</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Impedance Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#requirements">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#installing-from-github">Installing from GitHub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../technical_implementations.html">Technical Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">impedance_agent</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Impedance Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">impedance_agent.core.models</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for impedance_agent.core.models</h1><div class="highlight"><pre>
+<span></span><span class="c1"># src/core/models.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">ConfigDict</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+<div class="viewcode-block" id="ImpedanceData">
+<a class="viewcode-back" href="../../../impedance_agent.core.html#impedance_agent.core.models.ImpedanceData">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ImpedanceData</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Container for electrochemical impedance spectroscopy data.&quot;&quot;&quot;</span>
+
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">frequency</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Array of measurement frequencies in Hz&quot;</span><span class="p">)</span>
+    <span class="n">real</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Real component of impedance in ohms&quot;</span><span class="p">)</span>
+    <span class="n">imaginary</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Imaginary component of impedance in ohms&quot;</span><span class="p">)</span>
+    <span class="n">measurement_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Unique identifier for the measurement&quot;</span><span class="p">)</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;When the measurement was taken&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FitQualityMetrics">
+<a class="viewcode-back" href="../../../impedance_agent.core.html#impedance_agent.core.models.FitQualityMetrics">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FitQualityMetrics</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Quality metrics for assessing impedance fits.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    [1] Boukamp, B.A. &quot;A Linear Kronig-Kramers Transform Test for Immittance Data Validation.&quot;</span>
+<span class="sd">        J. Electrochem. Soc. 142 (1995)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">vector_difference</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Quantified vector difference metric&quot;</span><span class="p">)</span>
+    <span class="n">vector_quality</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Assessment of vector matching quality (&quot;excellent&quot;, &quot;acceptable&quot;, &quot;poor&quot;)&#39;</span><span class="p">)</span>
+    <span class="n">path_deviation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Quantified path following metric&quot;</span><span class="p">)</span>
+    <span class="n">path_quality</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Assessment of path following quality (&quot;excellent&quot;, &quot;acceptable&quot;, &quot;poor&quot;)&#39;</span><span class="p">)</span>
+    <span class="n">overall_quality</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Combined quality assessment&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FitResult">
+<a class="viewcode-back" href="../../../impedance_agent.core.html#impedance_agent.core.models.FitResult">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FitResult</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Results from equivalent circuit model fitting.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The fitting process uses weighted complex nonlinear least squares with:</span>
+
+<span class="sd">    * Parameter estimation minimizing: χ² = Σᵢ wᵢ|Z_{exp,i} - Z_{fit,i}|²</span>
+<span class="sd">    * Akaike Information Criterion: AIC = -2ln(L) + 2k where L is likelihood and k is number of parameters</span>
+<span class="sd">    * Parameter uncertainties via QR decomposition of weighted Jacobian</span>
+<span class="sd">    * Correlation matrix from Hessian of objective function</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    [1] Sadkowski, A. &quot;CNLS fits and Kramers-Kronig validation of resonant EIS data.&quot;</span>
+<span class="sd">        Journal of Electroanalytical Chemistry (2004)</span>
+<span class="sd">    [2] Ingdal, M., Johnsen, R., &amp; Harrington, D. A. &quot;The Akaike information criterion</span>
+<span class="sd">        in weighted regression of immittance data.&quot; Electrochimica Acta (2019)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">parameters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Optimized model parameters&quot;</span><span class="p">)</span>
+    <span class="n">errors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Parameter uncertainties (standard errors)&quot;</span><span class="p">)</span>
+    <span class="n">param_info</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Parameter names and bounds&quot;</span><span class="p">)</span>
+    <span class="n">correlation_matrix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Parameter correlation coefficients&quot;</span><span class="p">)</span>
+    <span class="n">chi_square</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Chi-square statistic&quot;</span><span class="p">)</span>
+    <span class="n">aic</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Akaike Information Criterion&quot;</span><span class="p">)</span>
+    <span class="n">wrms</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Weighted root mean square error&quot;</span><span class="p">)</span>
+    <span class="n">dof</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Degrees of freedom&quot;</span><span class="p">)</span>
+    <span class="n">measurement_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Unique identifier for the measurement&quot;</span><span class="p">)</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;When the fit was performed&quot;</span><span class="p">)</span>
+    <span class="n">Z_fit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Fitted impedance values&quot;</span><span class="p">)</span>
+    <span class="n">fit_quality</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FitQualityMetrics</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Detailed quality metrics&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DRTResult">
+<a class="viewcode-back" href="../../../impedance_agent.core.html#impedance_agent.core.models.DRTResult">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DRTResult</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Results from Distribution of Relaxation Times (DRT) analysis.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The DRT analysis solves the integral equation:</span>
+<span class="sd">    Z(ω) - R_∞ = R_pol ∫₀^∞ γ(τ)/(1 + iωτ)dτ</span>
+
+<span class="sd">    Uses Tikhonov Regularization + Projected Gradient (TRPG) method.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    [1] Kulikovsky, A. &quot;PEM fuel cell distribution of relaxation times: a method for the</span>
+<span class="sd">        calculation and behavior of an oxygen transport peak.&quot; (2021)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">tau</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Time constant array&quot;</span><span class="p">)</span>
+    <span class="n">gamma</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;DRT function values&quot;</span><span class="p">)</span>
+    <span class="n">peak_frequencies</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Characteristic frequencies of identified processes&quot;</span><span class="p">)</span>
+    <span class="n">peak_polarizations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Polarization resistance of each process&quot;</span><span class="p">)</span>
+    <span class="n">regularization_param</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Optimal regularization parameter&quot;</span><span class="p">)</span>
+    <span class="n">residual</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Fitting residual&quot;</span><span class="p">)</span>
+    <span class="n">Z_fit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reconstructed impedance from DRT&quot;</span><span class="p">)</span>
+    <span class="n">residuals_real</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Real part fitting residuals&quot;</span><span class="p">)</span>
+    <span class="n">residuals_imag</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Imaginary part fitting residuals&quot;</span><span class="p">)</span>
+    <span class="n">fit_quality</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FitQualityMetrics</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Quality assessment metrics&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LinKKResult">
+<a class="viewcode-back" href="../../../impedance_agent.core.html#impedance_agent.core.models.LinKKResult">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LinKKResult</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Results from Lin-KK (Linear Kramers-Kronig) validation analysis.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    [1] Boukamp, B.A. &quot;A Linear Kronig‐Kramers Transform Test for Immittance Data Validation.&quot;</span>
+<span class="sd">        J. Electrochem. Soc. 142 (1995)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">M</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Number of basis functions used&quot;</span><span class="p">)</span>
+    <span class="n">mu</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Spacing parameter for basis functions&quot;</span><span class="p">)</span>
+    <span class="n">Z_fit</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;K-K consistent impedance&quot;</span><span class="p">)</span>
+    <span class="n">residuals_real</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Real part residuals&quot;</span><span class="p">)</span>
+    <span class="n">residuals_imag</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Imaginary part residuals&quot;</span><span class="p">)</span>
+    <span class="n">max_residual</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Maximum absolute residual&quot;</span><span class="p">)</span>
+    <span class="n">mean_residual</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Mean absolute residual&quot;</span><span class="p">)</span>
+    <span class="n">fit_quality</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FitQualityMetrics</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Quality assessment metrics&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AnalysisResult">
+<a class="viewcode-back" href="../../../impedance_agent.core.html#impedance_agent.core.models.AnalysisResult">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AnalysisResult</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Comprehensive impedance analysis results combining multiple methods.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    [1] Barsoukov, E., Macdonald, J.R. &quot;Impedance Spectroscopy: Theory, Experiment, and Applications.&quot;</span>
+<span class="sd">        Wiley (2018)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">ecm_fit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FitResult</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Equivalent circuit fitting results&quot;</span><span class="p">)</span>
+    <span class="n">drt_fit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DRTResult</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;DRT analysis results&quot;</span><span class="p">)</span>
+    <span class="n">linkk_fit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LinKKResult</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Data validation results&quot;</span><span class="p">)</span>
+    <span class="n">summary</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Key findings and conclusions&quot;</span><span class="p">)</span>
+    <span class="n">recommendations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Suggested next steps and improvements&quot;</span><span class="p">)</span>
+    <span class="n">overall_assessment</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Overall analysis including cross-method fit quality comparison&quot;</span>
+    <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Richard Chukwu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

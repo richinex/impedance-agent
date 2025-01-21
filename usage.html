@@ -1,0 +1,346 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usage &mdash; Impedance Agent</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="examples/index.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Impedance Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#installing-from-github">Installing from GitHub</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#working-with-impedances-in-python">Working with Impedances in Python</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-rules">Basic Rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-usage">Example Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-circuit-elements">Common Circuit Elements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-interface">Command Line Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-analysis">Basic Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cli-options">CLI Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#python-api">Python API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#complete-example">Complete Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="technical_implementations.html">Technical Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">impedance_agent</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Impedance Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Usage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h1>
+<section id="working-with-impedances-in-python">
+<h2>Working with Impedances in Python<a class="headerlink" href="#working-with-impedances-in-python" title="Link to this heading"></a></h2>
+<p>Building complex impedance models is surprisingly simple in Python when you get the hang of it! Here are the key principles:</p>
+<p>Note: In our code implementation, we use JAX’s NumPy (jnp) instead of standard NumPy (np) because JAX provides automatic differentiation and just-in-time compilation. These make the computation faster.</p>
+<section id="basic-rules">
+<h3>Basic Rules<a class="headerlink" href="#basic-rules" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>For components in <strong>series</strong>: Add the impedances (Z)</p></li>
+<li><p>For components in <strong>parallel</strong>: Add the admittances (Y = 1/Z)</p></li>
+</ol>
+</section>
+<section id="example-usage">
+<h3>Example Usage<a class="headerlink" href="#example-usage" title="Link to this heading"></a></h3>
+<p>Let’s understand how to build circuit models, writing them in a natural way while following the format needed for the impedance agent:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example: RC parallel circuit in series with resistor</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rc_circuit</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    RC circuit: Rs + (Rct || Cdl)</span>
+<span class="sd">    Written naturally but formatted for impedance agent</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        p: [Rs, Rct, Cdl] - array of parameters</span>
+<span class="sd">        f: frequencies</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f</span>
+    <span class="n">Rs</span><span class="p">,</span> <span class="n">Rct</span><span class="p">,</span> <span class="n">Cdl</span> <span class="o">=</span> <span class="n">p</span>
+
+    <span class="c1"># Define circuit elements</span>
+    <span class="n">Zs</span> <span class="o">=</span> <span class="n">Rs</span>                      <span class="c1"># Series resistance</span>
+    <span class="n">Zrct</span> <span class="o">=</span> <span class="n">Rct</span>                   <span class="c1"># Charge transfer resistance</span>
+    <span class="n">Zcdl</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">Cdl</span><span class="p">)</span>    <span class="c1"># Double layer capacitance</span>
+
+    <span class="c1"># Combine parallel elements (Rct || Cdl):</span>
+    <span class="n">Yrct</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">Zrct</span>               <span class="c1"># Convert to admittance</span>
+    <span class="n">Ycdl</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">Zcdl</span>               <span class="c1"># Convert to admittance</span>
+    <span class="n">Ytotal</span> <span class="o">=</span> <span class="n">Yrct</span> <span class="o">+</span> <span class="n">Ycdl</span>        <span class="c1"># Add admittances in parallel</span>
+    <span class="n">Zrct_cdl</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">Ytotal</span>         <span class="c1"># Convert back to impedance</span>
+
+    <span class="c1"># Add series resistance</span>
+    <span class="n">Ztotal</span> <span class="o">=</span> <span class="n">Zs</span> <span class="o">+</span> <span class="n">Zrct_cdl</span>
+
+    <span class="c1"># Return real and imaginary parts concatenated</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">Ztotal</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">Ztotal</span><span class="o">.</span><span class="n">imag</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Here’s another example with a Randles circuit including CPE and Warburg elements:</p>
+<a class="reference internal image-reference" href="_images/modified_randles.png"><img alt="Modified Randles Circuit Diagram" class="align-center" src="_images/modified_randles.png" style="width: 400px;" />
+</a>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">randles_circuit</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Randles circuit with CPE and finite-length Warburg:</span>
+<span class="sd">    Rs + (Qdl || (Rct + W || Rw))</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        p: [Rs, Q, n, Rct, W, Rw] - array of parameters</span>
+<span class="sd">        f: frequencies</span>
+
+<span class="sd">        Rs: Series resistance</span>
+<span class="sd">        Q: CPE constant</span>
+<span class="sd">        n: CPE exponent</span>
+<span class="sd">        Rct: Charge transfer resistance</span>
+<span class="sd">        W: Warburg coefficient</span>
+<span class="sd">        Rw: Warburg resistance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f</span>
+    <span class="n">Rs</span><span class="p">,</span> <span class="n">Qdl</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">Rct</span><span class="p">,</span> <span class="n">Wct</span><span class="p">,</span> <span class="n">Rw</span> <span class="o">=</span> <span class="n">p</span>
+
+    <span class="c1"># Define circuit elements</span>
+    <span class="n">Zs</span> <span class="o">=</span> <span class="n">Rs</span>                                  <span class="c1"># Series resistance</span>
+    <span class="n">Zcpe</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">Qdl</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span><span class="o">**</span><span class="n">n</span><span class="p">)</span>            <span class="c1"># CPE impedance</span>
+    <span class="n">Zw</span> <span class="o">=</span> <span class="n">Wct</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span><span class="p">)</span>         <span class="c1"># Warburg impedance</span>
+
+    <span class="c1"># Combine Warburg with Rw in parallel</span>
+    <span class="n">Yw</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">Zw</span>                               <span class="c1"># Warburg admittance</span>
+    <span class="n">Yrw</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">Rw</span>                              <span class="c1"># Rw admittance</span>
+    <span class="n">Yw_total</span> <span class="o">=</span> <span class="n">Yw</span> <span class="o">+</span> <span class="n">Yrw</span>                     <span class="c1"># Parallel combination</span>
+    <span class="n">Zw_total</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">Yw_total</span>                   <span class="c1"># Back to impedance</span>
+
+    <span class="c1"># Add Rct in series with Warburg||Rw</span>
+    <span class="n">Zrct_w</span> <span class="o">=</span> <span class="n">Rct</span> <span class="o">+</span> <span class="n">Zw_total</span>
+
+    <span class="c1"># Combine with CPE in parallel</span>
+    <span class="n">Yrct_w</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">Zrct_w</span>                       <span class="c1"># Convert to admittance</span>
+    <span class="n">Ycpe</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">Zcpe</span>                           <span class="c1"># CPE admittance</span>
+    <span class="n">Ytotal</span> <span class="o">=</span> <span class="n">Yrct_w</span> <span class="o">+</span> <span class="n">Ycpe</span>                  <span class="c1"># Parallel combination</span>
+    <span class="n">Ztotal</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">Ytotal</span>                       <span class="c1"># Back to impedance</span>
+
+    <span class="c1"># Add series resistance</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">Zs</span> <span class="o">+</span> <span class="n">Ztotal</span>
+
+    <span class="c1"># Return real and imaginary parts concatenated</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">Z</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">Z</span><span class="o">.</span><span class="n">imag</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="common-circuit-elements">
+<h3>Common Circuit Elements<a class="headerlink" href="#common-circuit-elements" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Resistor (R)</span>
+<span class="n">Z_R</span> <span class="o">=</span> <span class="n">R</span>
+
+<span class="c1"># Capacitor (C)</span>
+<span class="n">Z_C</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">C</span><span class="p">)</span>
+
+<span class="c1"># Inductor (L)</span>
+<span class="n">Z_L</span> <span class="o">=</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">L</span>
+
+<span class="c1"># Warburg Element (W)</span>
+<span class="n">Z_W</span> <span class="o">=</span> <span class="n">W</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span><span class="p">)</span>
+
+<span class="c1"># Constant Phase Element (CPE)</span>
+<span class="n">Z_CPE</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">Y0</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span><span class="o">**</span><span class="n">alpha</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="command-line-interface">
+<h2>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Link to this heading"></a></h2>
+<section id="basic-analysis">
+<h3>Basic Analysis<a class="headerlink" href="#basic-analysis" title="Link to this heading"></a></h3>
+<p>The CLI provides several options for analyzing impedance data:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Basic analysis with default settings</span>
+impedance-agent<span class="w"> </span>analyze<span class="w"> </span>data.txt
+
+<span class="c1"># Analysis with custom ECM model</span>
+impedance-agent<span class="w"> </span>analyze<span class="w"> </span>data.txt<span class="w"> </span>--ecm<span class="w"> </span>model.yaml
+
+<span class="c1"># Analysis with specific LLM provider</span>
+impedance-agent<span class="w"> </span>analyze<span class="w"> </span>data.txt<span class="w"> </span>--provider<span class="w"> </span>deepseek
+
+<span class="c1"># Export results and generate plots</span>
+impedance-agent<span class="w"> </span>analyze<span class="w"> </span>data.txt<span class="w"> </span>--output-path<span class="w"> </span>results/analysis.json<span class="w"> </span>--plot
+</pre></div>
+</div>
+</section>
+<section id="cli-options">
+<h3>CLI Options<a class="headerlink" href="#cli-options" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Arguments:
+    data_path                Path to impedance data file
+
+Options:
+    --provider TEXT         LLM provider (deepseek/openai) [default: deepseek]
+    --ecm TEXT             Path to the equivalent circuit model(ECM) configuration file
+    --output-path TEXT     Path for output files
+    --output-format TEXT   Output format (json/csv/excel) [default: json]
+    --plot-format TEXT     Plot format (png/pdf/svg) [default: png]
+    --plot                 Generate plots [default: True]
+    --show-plots           Display plots in window [default: False]
+    --log-level TEXT       Logging level
+    --debug               Enable debug mode
+    --workers INTEGER      Number of worker processes
+</pre></div>
+</div>
+</section>
+</section>
+<section id="python-api">
+<h2>Python API<a class="headerlink" href="#python-api" title="Link to this heading"></a></h2>
+<section id="basic-usage">
+<h3>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">impedance_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImpedanceAnalysisAgent</span>
+
+<span class="c1"># Initialize the agent with specific provider</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">ImpedanceAnalysisAgent</span><span class="p">(</span><span class="n">provider</span><span class="o">=</span><span class="s2">&quot;deepseek&quot;</span><span class="p">)</span>
+
+<span class="c1"># Analyze data with built-in model</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="s2">&quot;data.txt&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;randles&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="complete-example">
+<h3>Complete Example<a class="headerlink" href="#complete-example" title="Link to this heading"></a></h3>
+<p>Here’s a complete example demonstrating impedance analysis with synthetic data:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">impedance_agent.core.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImpedanceData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">impedance_agent.agent.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImpedanceAnalysisAgent</span>
+
+<span class="c1"># Create sample data</span>
+<span class="n">freq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">z_real</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="mf">1e-3</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">z_imag</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="mf">1e-3</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">ImpedanceData</span><span class="p">(</span><span class="n">frequency</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="n">z_real</span><span class="p">,</span> <span class="n">imaginary</span><span class="o">=</span><span class="n">z_imag</span><span class="p">)</span>
+
+<span class="c1"># Define ECM configuration</span>
+<span class="n">ecm_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;model_code&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    def impedance_model(p, f):</span>
+<span class="s2">        w = 2 * jnp.pi * f</span>
+<span class="s2">        Rs, Rct, Cdl = p</span>
+<span class="s2">        Z = Rs + Rct / (1 + 1j * w * Cdl * Rct)</span>
+<span class="s2">        return jnp.concatenate([Z.real, Z.imag])</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Rs&quot;</span><span class="p">,</span> <span class="s2">&quot;initialValue&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;lowerBound&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;upperBound&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Rct&quot;</span><span class="p">,</span> <span class="s2">&quot;initialValue&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s2">&quot;lowerBound&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;upperBound&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Cdl&quot;</span><span class="p">,</span> <span class="s2">&quot;initialValue&quot;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="s2">&quot;lowerBound&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;upperBound&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="p">],</span>
+<span class="p">}</span>
+
+<span class="c1"># Run analysis</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">ImpedanceAnalysisAgent</span><span class="p">(</span><span class="n">provider</span><span class="o">=</span><span class="s2">&quot;deepseek&quot;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ecm_config</span><span class="p">)</span>
+
+<span class="c1"># Print results</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">time_constant_analysis</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Time Constant Analysis:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Matching score: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">time_constant_analysis</span><span class="p">[</span><span class="s1">&#39;matching_score&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples/index.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Richard Chukwu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

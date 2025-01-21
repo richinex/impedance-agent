@@ -1,0 +1,700 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>impedance_agent.fitters.ecm &mdash; Impedance Agent</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Impedance Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#requirements">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#installing-from-github">Installing from GitHub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../technical_implementations.html">Technical Implementations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">impedance_agent</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Impedance Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">impedance_agent.fitters.ecm</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for impedance_agent.fitters.ecm</h1><div class="highlight"><pre>
+<span></span><span class="c1"># src/fitters/ecm.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jaxopt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImpedanceData</span><span class="p">,</span> <span class="n">FitResult</span><span class="p">,</span> <span class="n">FitQualityMetrics</span>
+
+
+<div class="viewcode-block" id="ECMFitter">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.ecm.ECMFitter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ECMFitter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Equivalent Circuit Model (ECM) fitting for electrochemical impedance data.</span>
+
+<span class="sd">    This class implements least squares optimization with bounded parameters for fitting</span>
+<span class="sd">    equivalent circuit models to impedance data. The fitting process uses weighted residuals</span>
+<span class="sd">    and supports different weighting schemes.</span>
+
+<span class="sd">    The fundamental equation for the weighted sum of squared residuals is:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        WRSS = \\sum_{i=1}^N \\frac{(Z_{\\mathrm{exp},i} - Z_{\\mathrm{model},i})^2}{\\sigma_i^2}</span>
+
+<span class="sd">    Supported weighting schemes:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \\sigma_i = \\begin{cases}</span>
+<span class="sd">        1 &amp; \\text{for unit weighting} \\\\</span>
+<span class="sd">        |Z_{\\mathrm{exp},i}| &amp; \\text{for proportional weighting} \\\\</span>
+<span class="sd">        \\sqrt{(\\mathrm{Re}(Z_{\\mathrm{exp},i}))^2 + (\\mathrm{Im}(Z_{\\mathrm{exp},i}))^2} &amp; \\text{for modulus weighting}</span>
+<span class="sd">        \\end{cases}</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model_func : callable</span>
+<span class="sd">        Function that takes parameters and frequencies and returns impedance</span>
+<span class="sd">    p0 : array_like</span>
+<span class="sd">        Initial parameter values</span>
+<span class="sd">    freq : array_like</span>
+<span class="sd">        Frequency values</span>
+<span class="sd">    impedance_data : ImpedanceData</span>
+<span class="sd">        Object containing experimental impedance data</span>
+<span class="sd">    lb : array_like</span>
+<span class="sd">        Lower bounds for parameters</span>
+<span class="sd">    ub : array_like</span>
+<span class="sd">        Upper bounds for parameters</span>
+<span class="sd">    param_info : list</span>
+<span class="sd">        List of dictionaries containing parameter information</span>
+<span class="sd">    weighting : str or array_like, optional</span>
+<span class="sd">        Weighting scheme (&#39;unit&#39;, &#39;proportional&#39;, &#39;modulus&#39;) or custom weights (default: &#39;modulus&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ECMFitter.__init__">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.ecm.ECMFitter.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model_func</span><span class="p">,</span>
+        <span class="n">p0</span><span class="p">,</span>
+        <span class="n">freq</span><span class="p">,</span>
+        <span class="n">impedance_data</span><span class="p">:</span> <span class="n">ImpedanceData</span><span class="p">,</span>
+        <span class="n">lb</span><span class="p">,</span>
+        <span class="n">ub</span><span class="p">,</span>
+        <span class="n">param_info</span><span class="p">,</span>
+        <span class="n">weighting</span><span class="o">=</span><span class="s2">&quot;modulus&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize ECM fitter with model and data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model_func : callable</span>
+<span class="sd">            Function that takes parameters and frequencies and returns impedance</span>
+<span class="sd">        p0 : array_like</span>
+<span class="sd">            Initial parameter values</span>
+<span class="sd">        freq : array_like</span>
+<span class="sd">            Frequency values</span>
+<span class="sd">        impedance_data : ImpedanceData</span>
+<span class="sd">            Object containing experimental impedance data</span>
+<span class="sd">        lb : array_like</span>
+<span class="sd">            Lower bounds for parameters</span>
+<span class="sd">        ub : array_like</span>
+<span class="sd">            Upper bounds for parameters</span>
+<span class="sd">        param_info : list</span>
+<span class="sd">            List of dictionaries containing parameter information</span>
+<span class="sd">        weighting : str or array_like, optional</span>
+<span class="sd">            Weighting scheme (&#39;unit&#39;, &#39;proportional&#39;, &#39;modulus&#39;) or custom weights (default: &#39;modulus&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="n">jax</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_enable_x64&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Validate bounds</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">lb</span> <span class="o">&gt;</span> <span class="n">ub</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Lower bounds must be less than upper bounds&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Store data and setup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">impedance_data</span> <span class="o">=</span> <span class="n">impedance_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="n">freq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">impedance_data</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="n">impedance_data</span><span class="o">.</span><span class="n">imaginary</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">model_func</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p0</span> <span class="o">=</span> <span class="n">p0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lb</span> <span class="o">=</span> <span class="n">lb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ub</span> <span class="o">=</span> <span class="n">ub</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_params</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dof</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_info</span> <span class="o">=</span> <span class="n">param_info</span>
+
+        <span class="c1"># Set up weighting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_weighting</span><span class="p">(</span><span class="n">weighting</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ECMFitter.compute_normalized_residuals">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.ecm.ECMFitter.compute_normalized_residuals">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_normalized_residuals</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">Z_fit</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute normalized residuals using impedance modulus for normalization.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            r_{real} = \\frac{Z_{fit,real} - Z_{exp,real}}{\\sqrt{Z_{exp,real}^2 + Z_{exp,imag}^2}}</span>
+
+<span class="sd">            r_{imag} = \\frac{Z_{fit,imag} - Z_{exp,imag}}{\\sqrt{Z_{exp,real}^2 + Z_{exp,imag}^2}}</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Z_fit : np.ndarray</span>
+<span class="sd">            Complex array containing the fitted impedance values</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[np.ndarray, np.ndarray]</span>
+<span class="sd">            Tuple containing:</span>
+<span class="sd">            - residuals_real: Normalized residuals of the real component</span>
+<span class="sd">            - residuals_imag: Normalized residuals of the imaginary component</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Calculate impedance modulus |Z| for normalization</span>
+        <span class="n">Z_mod</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">impedance_data</span><span class="o">.</span><span class="n">real</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">impedance_data</span><span class="o">.</span><span class="n">imaginary</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Compute normalized residuals using modulus</span>
+        <span class="n">residuals_real</span> <span class="o">=</span> <span class="p">(</span><span class="n">Z_fit</span><span class="o">.</span><span class="n">real</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">impedance_data</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">/</span> <span class="n">Z_mod</span>
+        <span class="n">residuals_imag</span> <span class="o">=</span> <span class="p">(</span><span class="n">Z_fit</span><span class="o">.</span><span class="n">imag</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">impedance_data</span><span class="o">.</span><span class="n">imaginary</span><span class="p">)</span> <span class="o">/</span> <span class="n">Z_mod</span>
+
+        <span class="k">return</span> <span class="n">residuals_real</span><span class="p">,</span> <span class="n">residuals_imag</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_weighting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weighting</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configure weighting scheme for the fitting process.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        weighting : str or array_like</span>
+<span class="sd">            Weighting scheme (&#39;unit&#39;, &#39;proportional&#39;, &#39;modulus&#39;) or custom weights</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \\sigma_i = \\begin{cases}</span>
+<span class="sd">                1 &amp; \\text{for unit weighting} \\\\</span>
+<span class="sd">                |Z_{exp,i}| &amp; \\text{for proportional weighting} \\\\</span>
+<span class="sd">                \\sqrt{(Re(Z_{exp,i}))^2 + (Im(Z_{exp,i}))^2} &amp; \\text{for modulus weighting}</span>
+<span class="sd">            \\end{cases}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">weighting</span><span class="p">,</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using custom sigma weighting array&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weighting_name</span> <span class="o">=</span> <span class="s2">&quot;sigma&quot;</span>
+            <span class="n">weighting</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">weighting</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">weighting</span><span class="o">.</span><span class="n">shape</span>
+            <span class="p">),</span> <span class="s2">&quot;Shape mismatch between data and weight array&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">zerr_Re</span> <span class="o">=</span> <span class="n">weighting</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">zerr_Im</span> <span class="o">=</span> <span class="n">weighting</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">weighting</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">weighting</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="s2">&quot;unit&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;proportional&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;modulus&quot;</span><span class="p">,</span>
+            <span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;Invalid weighting type: </span><span class="si">{</span><span class="n">weighting</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weighting_name</span> <span class="o">=</span> <span class="n">weighting</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weighting_name</span><span class="si">}</span><span class="s2"> weighting&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">weighting</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">zerr_Re</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">zerr_Im</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">weighting</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;proportional&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">zerr_Re</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">zerr_Im</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># modulus weighting</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">zerr_Re</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">zerr_Im</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ECMFitter.encode">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.ecm.ECMFitter.encode">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert external parameters to internal parameters using log-transform.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            p_{int} = \\log_{10}\\left(\\frac{p - lb}{1 - p/ub}\\right)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        p : jnp.ndarray</span>
+<span class="sd">            External parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        jnp.ndarray</span>
+<span class="sd">            Internal parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log10</span><span class="p">((</span><span class="n">p</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">lb</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">ub</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ECMFitter.decode">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.ecm.ECMFitter.decode">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert internal parameters to external parameters.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            p_{ext} = \\frac{lb + 10^p}{1 + 10^p/ub}</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        p : jnp.ndarray</span>
+<span class="sd">            Internal parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        jnp.ndarray</span>
+<span class="sd">            External parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lb</span> <span class="o">+</span> <span class="mi">10</span><span class="o">**</span><span class="n">p</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">10</span><span class="o">**</span><span class="n">p</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">ub</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ECMFitter.obj_fun">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.ecm.ECMFitter.obj_fun">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">obj_fun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_log</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate weighted objective function.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            WRSS = \\sum_{i=1}^N \\frac{(Z_{exp,i} - Z_{model,i})^2}{\\sigma_i^2}</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        p_log : jnp.ndarray</span>
+<span class="sd">            Parameters in log space</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Weighted residual sum of squares</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">p_log</span><span class="p">)</span>
+        <span class="n">z_concat</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">imag</span><span class="p">])</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">zerr_Re</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zerr_Im</span><span class="p">])</span>
+        <span class="n">z_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">p_norm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+        <span class="n">wrss</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="mi">1</span> <span class="o">/</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">z_concat</span> <span class="o">-</span> <span class="n">z_model</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wrss</span></div>
+
+
+<div class="viewcode-block" id="ECMFitter.compute_aic">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.ecm.ECMFitter.compute_aic">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_aic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wrss</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute Akaike Information Criterion (AIC) for model selection.</span>
+
+<span class="sd">        For unit weighting:</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \\mathrm{AIC} = 2N\\ln(2\\pi) - 2N\\ln(2N) + 2N + 2N\\ln(\\mathrm{WRSS}) + 2k</span>
+
+<span class="sd">        For modulus/proportional weighting:</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \\mathrm{AIC} = 2N\\ln(2\\pi) - 2N\\ln(2N) + 2N - \\sum\\ln(w_i) + 2N\\ln(\\mathrm{WRSS}) + 2(k+1)</span>
+
+<span class="sd">        For sigma weighting:</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \\mathrm{AIC} = 2N\\ln(2\\pi) + \\sum\\ln(\\sigma_i^2) + \\mathrm{WRSS} + 2k</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        wrss : float</span>
+<span class="sd">            Weighted residual sum of squares</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Computed AIC value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+        <span class="n">wt_re</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">zerr_Re</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">wt_im</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">zerr_Im</span><span class="o">**</span><span class="mi">2</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weighting_name</span> <span class="o">==</span> <span class="s2">&quot;sigma&quot;</span><span class="p">:</span>
+            <span class="n">m2lnL</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zerr_Re</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+                <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zerr_Im</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+                <span class="o">+</span> <span class="n">wrss</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">m2lnL</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_params</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">weighting_name</span> <span class="o">==</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span>
+            <span class="n">m2lnL</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+                <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span><span class="p">)</span>
+                <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span>
+                <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">wrss</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">m2lnL</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_params</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">m2lnL</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+                <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span><span class="p">)</span>
+                <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span>
+                <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">wt_re</span><span class="p">))</span>
+                <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">wt_im</span><span class="p">))</span>
+                <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">wrss</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">m2lnL</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_params</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_uncertainties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">popt</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">wrms</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate parameter uncertainties using QR decomposition of the Jacobian.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \\sigma_j = \\|R^{-1}_j\\| \\sqrt{WRMS}</span>
+
+<span class="sd">        Where:</span>
+<span class="sd">        - R is the upper triangular matrix from QR decomposition</span>
+<span class="sd">        - WRMS is the weighted root mean square error</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        popt : jnp.ndarray</span>
+<span class="sd">            Optimal parameters</span>
+<span class="sd">        wrms : float</span>
+<span class="sd">            Weighted root mean square error</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        jnp.ndarray</span>
+<span class="sd">            Array of parameter uncertainties</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jacfwd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)(</span><span class="n">popt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+        <span class="n">grads_re</span> <span class="o">=</span> <span class="n">grads</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span><span class="p">]</span>
+        <span class="n">grads_im</span> <span class="o">=</span> <span class="n">grads</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span> <span class="p">:]</span>
+
+        <span class="n">rtwre</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">zerr_Re</span><span class="p">)</span>
+        <span class="n">rtwim</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">zerr_Im</span><span class="p">)</span>
+        <span class="n">vre</span> <span class="o">=</span> <span class="n">rtwre</span> <span class="o">@</span> <span class="n">grads_re</span>
+        <span class="n">vim</span> <span class="o">=</span> <span class="n">rtwim</span> <span class="o">@</span> <span class="n">grads_im</span>
+
+        <span class="n">Q1</span><span class="p">,</span> <span class="n">R1</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">qr</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">vre</span><span class="p">,</span> <span class="n">vim</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">invR1</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">R1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">invR1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">wrms</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_correlation_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">popt</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate correlation matrix using Hessian of objective function.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            C_{ij} = \\frac{H^{-1}_{ij}}{\\sqrt{H^{-1}_{ii}H^{-1}_{jj}}}</span>
+
+<span class="sd">        Where H is the Hessian matrix at the optimal parameters.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        popt : jnp.ndarray</span>
+<span class="sd">            Optimal parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        jnp.ndarray</span>
+<span class="sd">            Correlation matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get Hessian at optimal parameters</span>
+        <span class="n">hessian</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">hessian</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_fun</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">popt</span><span class="p">))</span>
+
+        <span class="c1"># Use SVD for numerical stability</span>
+        <span class="n">U</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">Vt</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">hessian</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Filter small singular values</span>
+        <span class="n">rcond</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">hessian</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">cutoff</span> <span class="o">=</span> <span class="n">rcond</span> <span class="o">*</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">s_inv</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">s</span> <span class="o">&gt;</span> <span class="n">cutoff</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Compute covariance matrix as inverse of Hessian</span>
+        <span class="n">cov</span> <span class="o">=</span> <span class="p">(</span><span class="n">Vt</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">s_inv</span><span class="p">)</span> <span class="o">@</span> <span class="n">Vt</span>
+
+        <span class="c1"># Calculate correlation matrix</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">cov</span><span class="p">))</span>
+        <span class="n">corr</span> <span class="o">=</span> <span class="n">cov</span> <span class="o">/</span> <span class="p">(</span><span class="n">std</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">@</span> <span class="n">std</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:])</span>
+
+        <span class="k">return</span> <span class="n">corr</span>
+
+<div class="viewcode-block" id="ECMFitter.calculate_fitted_impedance">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.ecm.ECMFitter.calculate_fitted_impedance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_fitted_impedance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate fitted impedance values from parameters.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        parameters : jnp.ndarray</span>
+<span class="sd">            Model parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        jnp.ndarray</span>
+<span class="sd">            Complex array of fitted impedance values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">z_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">z_model</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">z_model</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_freq</span> <span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="ECMFitter.compute_fit_quality_metrics">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.ecm.ECMFitter.compute_fit_quality_metrics">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_fit_quality_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Z_fit</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FitQualityMetrics</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute fit quality using vector difference and path deviation metrics.</span>
+
+<span class="sd">        The vector difference analysis quantifies the point-by-point agreement:</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \\mathrm{VD} = \\frac{1}{N}\\sum_{i=1}^N \\frac{|Z_{\\mathrm{fit},i} - Z_{\\mathrm{exp},i}|}{|Z_{\\mathrm{exp},i}|}</span>
+
+<span class="sd">        The path deviation analysis quantifies trajectory agreement:</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \\mathrm{PD} = \\frac{1}{N-1}\\sum_{i=1}^{N-1} \\left|\\frac{\\Delta Z_{\\mathrm{fit},i}}{|\\Delta Z_{\\mathrm{fit},i}|} -</span>
+<span class="sd">            \\frac{\\Delta Z_{\\mathrm{exp},i}}{|\\Delta Z_{\\mathrm{exp},i}|}\\right|</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        Z_fit : np.ndarray</span>
+<span class="sd">            Complex fitted impedance array</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        FitQualityMetrics</span>
+<span class="sd">            Computed quality metrics including vector difference, path deviation,</span>
+<span class="sd">            and overall quality assessment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Z_exp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">impedance_data</span><span class="o">.</span><span class="n">real</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">impedance_data</span><span class="o">.</span><span class="n">imaginary</span>
+
+        <span class="c1"># 1. Vector Difference Analysis</span>
+        <span class="n">vector_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Z_fit</span> <span class="o">-</span> <span class="n">Z_exp</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Z_exp</span><span class="p">))</span>
+
+        <span class="c1"># Assign vector quality</span>
+        <span class="k">if</span> <span class="n">vector_diff</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">:</span>  <span class="c1"># 5% average deviation</span>
+            <span class="n">vector_quality</span> <span class="o">=</span> <span class="s2">&quot;excellent&quot;</span>
+        <span class="k">elif</span> <span class="n">vector_diff</span> <span class="o">&lt;</span> <span class="mf">0.10</span><span class="p">:</span>  <span class="c1"># 10% average deviation</span>
+            <span class="n">vector_quality</span> <span class="o">=</span> <span class="s2">&quot;acceptable&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vector_quality</span> <span class="o">=</span> <span class="s2">&quot;poor&quot;</span>
+
+        <span class="c1"># 2. Path Deviation Analysis</span>
+        <span class="n">dZ_exp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">Z_exp</span><span class="p">)</span>
+        <span class="n">dZ_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">Z_fit</span><span class="p">)</span>
+
+        <span class="c1"># Normalize vectors to unit length and compare directions</span>
+        <span class="n">path_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dZ_fit</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dZ_fit</span><span class="p">)</span> <span class="o">-</span> <span class="n">dZ_exp</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dZ_exp</span><span class="p">)))</span>
+
+        <span class="c1"># Assign path quality</span>
+        <span class="k">if</span> <span class="n">path_diff</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">:</span>  <span class="c1"># 5% average path deviation</span>
+            <span class="n">path_quality</span> <span class="o">=</span> <span class="s2">&quot;excellent&quot;</span>
+        <span class="k">elif</span> <span class="n">path_diff</span> <span class="o">&lt;</span> <span class="mf">0.10</span><span class="p">:</span>  <span class="c1"># 10% average path deviation</span>
+            <span class="n">path_quality</span> <span class="o">=</span> <span class="s2">&quot;acceptable&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path_quality</span> <span class="o">=</span> <span class="s2">&quot;poor&quot;</span>
+
+        <span class="c1"># Overall quality assessment</span>
+        <span class="k">if</span> <span class="n">vector_quality</span> <span class="o">==</span> <span class="s2">&quot;excellent&quot;</span> <span class="ow">and</span> <span class="n">path_quality</span> <span class="o">==</span> <span class="s2">&quot;excellent&quot;</span><span class="p">:</span>
+            <span class="n">overall_quality</span> <span class="o">=</span> <span class="s2">&quot;excellent&quot;</span>
+        <span class="k">elif</span> <span class="n">vector_quality</span> <span class="o">==</span> <span class="s2">&quot;poor&quot;</span> <span class="ow">or</span> <span class="n">path_quality</span> <span class="o">==</span> <span class="s2">&quot;poor&quot;</span><span class="p">:</span>
+            <span class="n">overall_quality</span> <span class="o">=</span> <span class="s2">&quot;poor&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">overall_quality</span> <span class="o">=</span> <span class="s2">&quot;acceptable&quot;</span>
+
+        <span class="k">return</span> <span class="n">FitQualityMetrics</span><span class="p">(</span>
+            <span class="n">vector_difference</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">vector_diff</span><span class="p">),</span>
+            <span class="n">vector_quality</span><span class="o">=</span><span class="n">vector_quality</span><span class="p">,</span>
+            <span class="n">path_deviation</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">path_diff</span><span class="p">),</span>
+            <span class="n">path_quality</span><span class="o">=</span><span class="n">path_quality</span><span class="p">,</span>
+            <span class="n">overall_quality</span><span class="o">=</span><span class="n">overall_quality</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ECMFitter.fit">
+<a class="viewcode-back" href="../../../impedance_agent.fitters.html#impedance_agent.fitters.ecm.ECMFitter.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FitResult</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform impedance fitting on the data.</span>
+
+<span class="sd">        The fitting process involves:</span>
+<span class="sd">        1. Parameter optimization using BFGS algorithm</span>
+<span class="sd">        2. Uncertainty calculation via QR decomposition</span>
+<span class="sd">        3. Computation of fit quality metrics</span>
+<span class="sd">        4. Calculation of correlation matrix</span>
+<span class="sd">        5. Model selection metrics (AIC)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Optional[FitResult]</span>
+<span class="sd">            Complete fitting results including:</span>
+<span class="sd">            - Optimized parameters and uncertainties</span>
+<span class="sd">            - Correlation matrix</span>
+<span class="sd">            - Goodness-of-fit metrics (χ², AIC, WRMS)</span>
+<span class="sd">            - Fitted impedance values</span>
+<span class="sd">            - Fit quality assessment</span>
+<span class="sd">            Returns None if fitting fails</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting ECM fitting&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Convert initial parameters to log scale</span>
+            <span class="n">p_log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initial parameters (log scale): </span><span class="si">{</span><span class="n">p_log</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Optimize using BFGS</span>
+            <span class="n">solver</span> <span class="o">=</span> <span class="n">jaxopt</span><span class="o">.</span><span class="n">ScipyMinimize</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;BFGS&quot;</span><span class="p">,</span> <span class="n">fun</span><span class="o">=</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_fun</span><span class="p">))</span>
+            <span class="n">sol</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">p_log</span><span class="p">)</span>
+
+            <span class="c1"># Get optimized parameters</span>
+            <span class="n">popt_log</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">params</span>
+            <span class="n">popt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">popt_log</span><span class="p">)</span>
+            <span class="n">wrss</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">fun_val</span>
+            <span class="n">wrms</span> <span class="o">=</span> <span class="n">wrss</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dof</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Optimization complete: WRMS = </span><span class="si">{</span><span class="n">wrms</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">param_info_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">val</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_info</span><span class="p">,</span> <span class="n">popt</span><span class="p">)]</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Optimal parameters:</span><span class="se">\n</span><span class="si">{</span><span class="n">param_info_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Calculate uncertainties</span>
+            <span class="n">perr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_uncertainties</span><span class="p">(</span><span class="n">popt</span><span class="p">,</span> <span class="n">wrms</span><span class="p">)</span>
+
+            <span class="c1"># Calculate fitted impedance values</span>
+            <span class="n">Z_fit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_fitted_impedance</span><span class="p">(</span><span class="n">popt</span><span class="p">)</span>
+            <span class="n">Z_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Z_fit</span><span class="p">)</span>
+
+            <span class="c1"># Calculate normalized residuals</span>
+            <span class="n">residuals_real</span><span class="p">,</span> <span class="n">residuals_imag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_normalized_residuals</span><span class="p">(</span><span class="n">Z_fit</span><span class="p">)</span>
+
+            <span class="c1"># Compute AIC</span>
+            <span class="n">aic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_aic</span><span class="p">(</span><span class="n">wrss</span><span class="p">)</span>
+
+            <span class="c1"># Compute fit quality metrics</span>
+            <span class="n">fit_quality_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_fit_quality_metrics</span><span class="p">(</span><span class="n">Z_fit</span><span class="p">)</span>
+
+            <span class="c1"># Calculate correlation matrix</span>
+            <span class="n">correlation_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calculate_correlation_matrix</span><span class="p">(</span><span class="n">popt</span><span class="p">))</span>
+
+            <span class="c1"># Create result object with all metrics</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">FitResult</span><span class="p">(</span>
+                <span class="n">parameters</span><span class="o">=</span><span class="n">popt</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                <span class="n">errors</span><span class="o">=</span><span class="n">perr</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                <span class="n">param_info</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">param_info</span><span class="p">,</span>
+                <span class="n">correlation_matrix</span><span class="o">=</span><span class="n">correlation_matrix</span><span class="p">,</span>
+                <span class="n">chi_square</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">wrss</span><span class="p">),</span>
+                <span class="n">aic</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">aic</span><span class="p">),</span>
+                <span class="n">wrms</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">wrms</span><span class="p">),</span>
+                <span class="n">dof</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dof</span><span class="p">,</span>
+                <span class="n">Z_fit</span><span class="o">=</span><span class="n">Z_fit</span><span class="p">,</span>
+                <span class="n">fit_quality</span><span class="o">=</span><span class="n">fit_quality_metrics</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fit metrics: χ² = </span><span class="si">{</span><span class="n">wrss</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2">, AIC = </span><span class="si">{</span><span class="n">aic</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;Parameter uncertainties:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">err</span><span class="si">:</span><span class="s2">.6e</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">err</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_info</span><span class="p">,</span> <span class="n">perr</span><span class="p">)]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;ECM fitting failed&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Richard Chukwu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

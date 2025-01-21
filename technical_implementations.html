@@ -1,0 +1,333 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Technical Implementations &mdash; Impedance Agent</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="impedance_agent" href="modules.html" />
+    <link rel="prev" title="Basic Analysis Example" href="examples/basic_analysis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Impedance Agent
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#installing-from-github">Installing from GitHub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Technical Implementations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#data-quality-assessment">Data Quality Assessment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#lin-kk-analysis">Lin-KK Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#equivalent-circuit-model-ecm-fitting">Equivalent Circuit Model (ECM) Fitting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#parameter-estimation-process">Parameter Estimation Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#weighting-schemes">Weighting Schemes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parameter-uncertainties">Parameter Uncertainties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#correlation-analysis">Correlation Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fit-quality-metrics">Fit Quality Metrics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#vector-difference-analysis">Vector Difference Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#path-following-analysis">Path Following Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#model-selection-metrics">Model Selection Metrics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#akaike-information-criterion-aic">Akaike Information Criterion (AIC)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#distribution-of-relaxation-times-drt">Distribution of Relaxation Times (DRT)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implementation-details">Implementation Details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#optimization-algorithm">Optimization Algorithm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#numerical-stability">Numerical Stability</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#llm-integration">LLM Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">impedance_agent</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Impedance Agent</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Technical Implementations</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/technical_implementations.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="technical-implementations">
+<h1>Technical Implementations<a class="headerlink" href="#technical-implementations" title="Link to this heading"></a></h1>
+<p>This document explains the methods and calculations used in impedance analysis.</p>
+<section id="data-quality-assessment">
+<h2>Data Quality Assessment<a class="headerlink" href="#data-quality-assessment" title="Link to this heading"></a></h2>
+<section id="lin-kk-analysis">
+<h3>Lin-KK Analysis<a class="headerlink" href="#lin-kk-analysis" title="Link to this heading"></a></h3>
+<p>The Lin-KK validation uses the impedancepy package, implementing the method from Schönleber et al. <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>. This implementation:</p>
+<ul class="simple">
+<li><p>Uses a Kramers-Kronig circuit model with ohmic resistor and RC elements</p></li>
+<li><p>Finds the best number of RC elements automatically</p></li>
+<li><p>Analyzes residuals to check data quality</p></li>
+<li><p>Confirms if measurements follow physical principles</p></li>
+</ul>
+</section>
+</section>
+<section id="equivalent-circuit-model-ecm-fitting">
+<h2>Equivalent Circuit Model (ECM) Fitting<a class="headerlink" href="#equivalent-circuit-model-ecm-fitting" title="Link to this heading"></a></h2>
+<section id="parameter-estimation-process">
+<h3>Parameter Estimation Process<a class="headerlink" href="#parameter-estimation-process" title="Link to this heading"></a></h3>
+<p>The fitting process has these steps:</p>
+<ol class="arabic">
+<li><p>Parameter Transformation</p>
+<p>For bounded optimization:</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}p_{\text{int}} = \log_{10}\left(\frac{p - lb}{1 - p/ub}\right)\\p_{\text{ext}} = \frac{lb + 10^p}{1 + 10^p/ub}\end{aligned}\end{align} \]</div>
+</li>
+<li><p>Objective Function</p>
+<p>Using weighted residuals:</p>
+<div class="math notranslate nohighlight">
+\[\text{WRSS} = \sum_{i=1}^N \frac{(Z_{\text{exp},i} - Z_{\text{model},i})^2}{\sigma_i^2}\]</div>
+</li>
+<li><p>Optimization</p>
+<p>Uses BFGS algorithm with weighted residuals and parameter bounds.</p>
+</li>
+</ol>
+</section>
+<section id="weighting-schemes">
+<h3>Weighting Schemes<a class="headerlink" href="#weighting-schemes" title="Link to this heading"></a></h3>
+<p>We offer three weighting options:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\sigma_i = \begin{cases}
+1 &amp; \text{for unit weighting} \\
+|Z_{\text{exp},i}| &amp; \text{for proportional weighting} \\
+\sqrt{(Re(Z_{\text{exp},i}))^2 + (Im(Z_{\text{exp},i}))^2} &amp; \text{for modulus weighting}
+\end{cases}\end{split}\]</div>
+</section>
+<section id="parameter-uncertainties">
+<h3>Parameter Uncertainties<a class="headerlink" href="#parameter-uncertainties" title="Link to this heading"></a></h3>
+<p>Calculated using QR decomposition of the weighted Jacobian:</p>
+<div class="math notranslate nohighlight">
+\[\sigma_j = \|R^{-1}_j\| \sqrt{\text{WRMS}}\]</div>
+<p>where:
+- R comes from QR decomposition of the weighted Jacobian
+- WRMS is weighted root mean square error
+- Jacobian elements: <span class="math notranslate nohighlight">\(J_{ij} = \frac{\partial Z_i}{\partial p_j}\)</span></p>
+</section>
+<section id="correlation-analysis">
+<h3>Correlation Analysis<a class="headerlink" href="#correlation-analysis" title="Link to this heading"></a></h3>
+<p>Using the Hessian of the objective function:</p>
+<div class="math notranslate nohighlight">
+\[C_{ij} = \frac{H^{-1}_{ij}}{\sqrt{H^{-1}_{ii}H^{-1}_{jj}}}\]</div>
+<p>Understanding the values:
+- <span class="math notranslate nohighlight">\(|r| &gt; 0.9\)</span>: Strong correlation
+- <span class="math notranslate nohighlight">\(0.7 &lt; |r| &lt; 0.9\)</span>: Medium correlation
+- <span class="math notranslate nohighlight">\(|r| &lt; 0.7\)</span>: Weak correlation</p>
+</section>
+</section>
+<section id="fit-quality-metrics">
+<h2>Fit Quality Metrics<a class="headerlink" href="#fit-quality-metrics" title="Link to this heading"></a></h2>
+<section id="vector-difference-analysis">
+<h3>Vector Difference Analysis<a class="headerlink" href="#vector-difference-analysis" title="Link to this heading"></a></h3>
+<p>Measures point-by-point agreement:</p>
+<div class="math notranslate nohighlight">
+\[\text{VD} = \frac{1}{N}\sum_{i=1}^N \frac{|Z_{\text{fit},i} - Z_{\text{exp},i}|}{|Z_{\text{exp},i}|}\]</div>
+<p>Quality guides:
+- Excellent: &lt; 0.05 (5% average deviation)
+- Good: &lt; 0.10 (10% average deviation)
+- Poor: &gt; 0.10</p>
+</section>
+<section id="path-following-analysis">
+<h3>Path Following Analysis<a class="headerlink" href="#path-following-analysis" title="Link to this heading"></a></h3>
+<p>Checks if model follows data trajectory:</p>
+<div class="math notranslate nohighlight">
+\[\text{PD} = \frac{1}{N-1}\sum_{i=1}^{N-1} \left|\frac{\Delta Z_{\text{fit},i}}{|\Delta Z_{\text{fit},i}|} - \frac{\Delta Z_{\text{exp},i}}{|\Delta Z_{\text{exp},i}|}\right|\]</div>
+<p>Quality guides:
+- Excellent: &lt; 0.05 (5% path deviation)
+- Good: &lt; 0.10 (10% path deviation)
+- Poor: &gt; 0.10 (shows model structure issues)</p>
+</section>
+</section>
+<section id="model-selection-metrics">
+<h2>Model Selection Metrics<a class="headerlink" href="#model-selection-metrics" title="Link to this heading"></a></h2>
+<section id="akaike-information-criterion-aic">
+<h3>Akaike Information Criterion (AIC)<a class="headerlink" href="#akaike-information-criterion-aic" title="Link to this heading"></a></h3>
+<p>For different weighting schemes <a class="footnote-reference brackets" href="#id5" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>:</p>
+<p>Unit weighting:</p>
+<div class="math notranslate nohighlight">
+\[\text{AIC} = 2N\ln(2\pi) - 2N\ln(2N) + 2N + 2N\ln(\text{WRSS}) + 2k\]</div>
+<p>Modulus/proportional weighting:</p>
+<div class="math notranslate nohighlight">
+\[\text{AIC} = 2N\ln(2\pi) - 2N\ln(2N) + 2N - \sum\ln(w_i) + 2N\ln(\text{WRSS}) + 2(k+1)\]</div>
+<p>Sigma weighting:</p>
+<div class="math notranslate nohighlight">
+\[\text{AIC} = 2N\ln(2\pi) + \sum\ln(\sigma_i^2) + \text{WRSS} + 2k\]</div>
+<p>where:
+- N is number of data points
+- k is number of model parameters
+- WRSS is weighted residual sum of squares</p>
+</section>
+</section>
+<section id="distribution-of-relaxation-times-drt">
+<h2>Distribution of Relaxation Times (DRT)<a class="headerlink" href="#distribution-of-relaxation-times-drt" title="Link to this heading"></a></h2>
+<p>We use Kulikovsky’s method <a class="footnote-reference brackets" href="#id6" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a> for DRT analysis, which:</p>
+<ul class="simple">
+<li><p>Combines Tikhonov regularization with projected gradient method</p></li>
+<li><p>Handles the ill-posed nature of DRT calculations</p></li>
+<li><p>Ensures physically meaningful results (non-negative distribution)</p></li>
+<li><p>Provides fast calculations</p></li>
+</ul>
+<p>The objective function is:</p>
+<div class="math notranslate nohighlight">
+\[\text{Objective Function} = \|Z_{\text{exp}} - Z_{\text{fit}}\|^2 + \lambda \|L \gamma\|^2\]</div>
+<p>where:
+- λ is regularization parameter
+- L is regularization operator
+- γ is distribution of relaxation times</p>
+</section>
+<section id="implementation-details">
+<h2>Implementation Details<a class="headerlink" href="#implementation-details" title="Link to this heading"></a></h2>
+<section id="optimization-algorithm">
+<h3>Optimization Algorithm<a class="headerlink" href="#optimization-algorithm" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>BFGS (Broyden-Fletcher-Goldfarb-Shanno) algorithm</p></li>
+<li><p>Bounded optimization through parameter transformation</p></li>
+<li><p>Automatic differentiation for gradients</p></li>
+</ul>
+</section>
+<section id="numerical-stability">
+<h3>Numerical Stability<a class="headerlink" href="#numerical-stability" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>SVD for correlation matrix calculation</p></li>
+<li><p>QR decomposition for uncertainty estimation</p></li>
+<li><p>DRT regularization</p></li>
+<li><p>Parameter scaling</p></li>
+</ul>
+</section>
+</section>
+<section id="llm-integration">
+<h2>LLM Integration<a class="headerlink" href="#llm-integration" title="Link to this heading"></a></h2>
+<p>The analysis workflow integrates these metrics with the LLM to:
+- Evaluate model validity based on path following
+- Guide model structure modifications
+- Interpret parameter correlations
+- Provide physically meaningful recommendations</p>
+<p>The LLM system is structured to prioritize analysis based on:
+1. Path following assessment (primary metric for ECM fits)
+2. Data quality assessment (primary focus for non-ECM analysis)</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Schönleber, M., et al. (2014). A Method for Improving the Robustness of linear Kramers-Kronig Validity Tests. <em>Electrochimica Acta</em>, <strong>131</strong>, 20-27.</p>
+</aside>
+<aside class="footnote brackets" id="id5" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>Ingdal, M., Johnsen, R., &amp; Harrington, D. A. (2019). The Akaike information criterion in weighted regression of immittance data. <em>Electrochimica Acta</em>, <strong>317</strong>, 648-653.</p>
+</aside>
+<aside class="footnote brackets" id="id6" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
+<p>Kulikovsky, A. (2020). PEM fuel cell distribution of relaxation times: A method for calculation and behavior of oxygen transport peak. <em>Physical Chemistry Chemical Physics</em>, <strong>19</strong>, 19131.</p>
+</aside>
+</aside>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>JAX helps with automatic differentiation and fast computation</p></li>
+<li><p>Error calculations assume normal distribution of residuals</p></li>
+<li><p>CPE and Warburg elements need special attention for correlations</p></li>
+<li><p>DRT needs careful selection of regularization parameter</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="examples/basic_analysis.html" class="btn btn-neutral float-left" title="Basic Analysis Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral float-right" title="impedance_agent" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Richard Chukwu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
