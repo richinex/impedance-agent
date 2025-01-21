@@ -15,45 +15,94 @@ Basic Rules
 
 Example Usage
 ~~~~~~~~~~~~~
+Let's understand how to build circuit models, writing them in a natural way while following the format needed for the impedance agent:
+
 .. code-block:: python
 
-    import numpy as np
-
-    def series_connection(Z1, Z2):
-        """Combine impedances in series"""
-        return Z1 + Z2
-
-    def parallel_connection(Z1, Z2):
-        """Combine impedances in parallel"""
-        return 1 / (1/Z1 + 1/Z2)
-
-    # Basic circuit elements
-    def resistor(R):
-        """Impedance of a resistor"""
-        return R
-
-    def capacitor(C, f):
-        """Impedance of a capacitor"""
-        w = 2 * np.pi * f
-        return 1 / (1j * w * C)
-
     # Example: RC parallel circuit in series with resistor
-    def rc_circuit(f, Rs=10, Rct=100, Cdl=1e-6):
-        """RC circuit: Rs + (Rct || Cdl)"""
-        Z_res = resistor(Rs)
-        Z_rct = resistor(Rct)
-        Z_cdl = capacitor(Cdl, f)
+    def rc_circuit(p, f):
+        """
+        RC circuit: Rs + (Rct || Cdl)
+        Written naturally but formatted for impedance agent
 
-        # First combine Rct and Cdl in parallel
-        Z_parallel = parallel_connection(Z_rct, Z_cdl)
+        Parameters:
+            p: [Rs, Rct, Cdl] - array of parameters
+            f: frequencies
+        """
+        w = 2 * jnp.pi * f
+        Rs, Rct, Cdl = p
 
-        # Then add Rs in series
-        Z_total = series_connection(Z_res, Z_parallel)
-        return Z_total
+        # Define circuit elements
+        Zs = Rs                      # Series resistance
+        Zrct = Rct                   # Charge transfer resistance
+        Zcdl = 1 / (1j * w * Cdl)    # Double layer capacitance
 
-    # Usage
-    frequencies = np.logspace(0, 5, 100)
-    Z = rc_circuit(frequencies)
+        # Combine parallel elements (Rct || Cdl):
+        Yrct = 1/Zrct               # Convert to admittance
+        Ycdl = 1/Zcdl               # Convert to admittance
+        Ytotal = Yrct + Ycdl        # Add admittances in parallel
+        Zrct_cdl = 1/Ytotal         # Convert back to impedance
+
+        # Add series resistance
+        Ztotal = Zs + Zrct_cdl
+
+        # Return real and imaginary parts concatenated
+        return jnp.concatenate([Ztotal.real, Ztotal.imag])
+
+Here's another example with a Randles circuit including CPE and Warburg elements:
+
+.. image:: /_static/images/modified_randles.png
+   :width: 400px
+   :align: center
+   :alt: Modified Randles Circuit Diagram
+
+.. code-block:: python
+
+    def randles_circuit(p, f):
+        """
+        Randles circuit with CPE and finite-length Warburg:
+        Rs + (Qdl || (Rct + W || Rw))
+
+        Parameters:
+            p: [Rs, Q, n, Rct, W, Rw] - array of parameters
+            f: frequencies
+
+            Rs: Series resistance
+            Q: CPE constant
+            n: CPE exponent
+            Rct: Charge transfer resistance
+            W: Warburg coefficient
+            Rw: Warburg resistance
+        """
+        w = 2 * jnp.pi * f
+        Rs, Qdl, n, Rct, Wct, Rw = p
+
+        # Define circuit elements
+        Zs = Rs                                  # Series resistance
+        Zcpe = 1 / (Qdl * (1j * w)**n)            # CPE impedance
+        Zw = Wct / jnp.sqrt(w) * (1 - 1j)         # Warburg impedance
+
+        # Combine Warburg with Rw in parallel
+        Yw = 1/Zw                               # Warburg admittance
+        Yrw = 1/Rw                              # Rw admittance
+        Yw_total = Yw + Yrw                     # Parallel combination
+        Zw_total = 1/Yw_total                   # Back to impedance
+
+        # Add Rct in series with Warburg||Rw
+        Zrct_w = Rct + Zw_total
+
+        # Combine with CPE in parallel
+        Yrct_w = 1/Zrct_w                       # Convert to admittance
+        Ycpe = 1/Zcpe                           # CPE admittance
+        Ytotal = Yrct_w + Ycpe                  # Parallel combination
+        Ztotal = 1/Ytotal                       # Back to impedance
+
+        # Add series resistance
+        Z = Zs + Ztotal
+
+        # Return real and imaginary parts concatenated
+        return jnp.concatenate([Z.real, Z.imag])
+
 
 Common Circuit Elements
 ~~~~~~~~~~~~~~~~~~~~~~~

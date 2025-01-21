@@ -271,6 +271,8 @@ If you find this tool useful, consider buying me a coffee:
 
 For detailed documentation, see the [docs](https://richinex.github.io/impedance-agent/)
 
+You can also check out my web app [fitmyeis](https://fitmyeis.com)
+
 ## ToDo
 
 It would be nice to have another command that takes in two equivalent circuit models and compares them on all fitting metrics
